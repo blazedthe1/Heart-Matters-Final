@@ -1,11 +1,38 @@
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import { Mail, Copy, Check } from "lucide-react";
 import { ECGMonitor } from "@/components/ECGMonitor";
 import { getPublishedArticles, type Article } from "@/hooks/useArticles";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+const EDITORS = [
+  { name: "Mishal Nediyodath", email: "mishal.nediyodath@gmail.com" },
+  { name: "Gallant Youngman", email: "gallantyoungman@gmail.com" },
+];
+
+function CopyEmailButton({ email, copyLabel, copiedLabel }: { email: string; copyLabel: string; copiedLabel: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard.writeText(email);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <button
+      onClick={copy}
+      className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+      style={{ background: copied ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.07)", color: copied ? "#4ade80" : "rgba(255,255,255,0.5)" }}
+    >
+      {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+      {copied ? copiedLabel : copyLabel}
+    </button>
+  );
+}
 
 export default function Home() {
   const [latestArticles, setLatestArticles] = useState<Article[]>([]);
+  const { t } = useLanguage();
 
   useEffect(() => {
     setLatestArticles(getPublishedArticles().slice(0, 3));
@@ -26,32 +53,31 @@ export default function Home() {
           >
             <div className="inline-flex items-center gap-2 bg-red-50 text-red-700 text-xs font-medium tracking-widest uppercase px-4 py-1.5 rounded-full mb-8 w-fit">
               <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
-              Student-led CVD Prevention
+              {t("hero_badge")}
             </div>
 
             <h1
               className="text-6xl lg:text-7xl font-bold leading-[1.02] tracking-tight text-[#0f0c0c] mb-6"
               style={{ fontFamily: "'Cormorant Garamond', serif" }}
             >
-              Listen to the{" "}
-              <em className="text-red-700 not-italic">rhythm</em>
-              <br />of your life.
+              {t("hero_title1")}{" "}
+              <em className="text-red-700 not-italic">{t("hero_title2")}</em>
+              <br />{t("hero_title3")}
             </h1>
 
             <p className="text-base text-[#8a7070] leading-relaxed max-w-md mb-10 font-light">
-              A student-driven platform bringing cardiovascular health education
-              to everyone — clear, compassionate, and evidence-based.
+              {t("hero_sub")}
             </p>
 
             <div className="flex flex-wrap gap-3">
               <Link href="/risk-assessment">
                 <button className="bg-[#0f0c0c] hover:bg-red-700 transition-colors text-white text-sm font-medium px-8 py-3.5 rounded-full cursor-pointer">
-                  Take the Risk Quiz
+                  {t("hero_cta1")}
                 </button>
               </Link>
               <Link href="/articles">
                 <button className="bg-transparent hover:border-red-600 hover:text-red-700 transition-colors text-[#0f0c0c] text-sm font-normal border border-[#e8d8d4] px-8 py-3.5 rounded-full cursor-pointer">
-                  Read Articles
+                  {t("hero_cta2")}
                 </button>
               </Link>
             </div>
@@ -73,15 +99,14 @@ export default function Home() {
 
       {/* ─── STATS STRIP ──────────────────────────────────────── */}
       <div className="relative bg-[#0f0c0c] overflow-hidden">
-        {/* Subtle red glow across the strip */}
         <div className="absolute inset-0 pointer-events-none"
           style={{ background: "radial-gradient(ellipse at 50% 120%, rgba(180,20,20,0.18), transparent 65%)" }} />
 
         <div className="relative grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/[0.06]">
           {[
-            { num: "17.9M", label: "Cardiovascular deaths globally each year", tag: "Leading cause of mortality" },
-            { num: "80%", label: "Of premature CVD cases are preventable", tag: "Through lifestyle changes" },
-            { num: "#1", label: "CVD is the world's single biggest killer", tag: "Knowledge is your defense" },
+            { num: "17.9M", labelKey: "stats_1_label", tagKey: "stats_1_tag" },
+            { num: "80%",   labelKey: "stats_2_label", tagKey: "stats_2_tag" },
+            { num: "#1",    labelKey: "stats_3_label", tagKey: "stats_3_tag" },
           ].map((s, i) => (
             <motion.div
               key={i}
@@ -91,59 +116,43 @@ export default function Home() {
               transition={{ delay: i * 0.12, duration: 0.55 }}
               className="relative group py-14 px-10 text-center flex flex-col items-center gap-3"
             >
-              {/* Per-card inner glow on hover */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                 style={{ background: "radial-gradient(ellipse at 50% 80%, rgba(180,20,20,0.12), transparent 70%)" }} />
-
               <div
                 className="text-6xl lg:text-7xl font-bold leading-none tracking-tight text-white relative z-10"
-                style={{ fontFamily: "'Cormorant Garamond', serif",
-                  textShadow: "0 0 60px rgba(220,30,30,0.35)" }}
+                style={{ fontFamily: "'Cormorant Garamond', serif", textShadow: "0 0 60px rgba(220,30,30,0.35)" }}
               >
                 <span className="text-red-500">{s.num}</span>
               </div>
-
               <div className="relative z-10">
-                <p className="text-sm text-white/55 leading-relaxed max-w-[200px]">{s.label}</p>
-                <p className="text-[11px] text-red-500/70 mt-1.5 tracking-widest uppercase font-medium">{s.tag}</p>
+                <p className="text-sm text-white/55 leading-relaxed max-w-[200px]">{t(s.labelKey)}</p>
+                <p className="text-[11px] text-red-500/70 mt-1.5 tracking-widest uppercase font-medium">{t(s.tagKey)}</p>
               </div>
             </motion.div>
           ))}
         </div>
-
-        {/* Bottom border line */}
         <div className="h-px bg-gradient-to-r from-transparent via-red-900/40 to-transparent" />
       </div>
 
       {/* ─── FEATURES ─────────────────────────────────────────── */}
       <section className="py-24 px-10 lg:px-16 max-w-6xl mx-auto w-full">
         <div className="mb-14">
-          <p className="text-[11px] tracking-[0.14em] uppercase text-red-700 font-medium mb-3">What we do</p>
+          <p className="text-[11px] tracking-[0.14em] uppercase text-red-700 font-medium mb-3">{t("feat_badge")}</p>
           <h2
             className="text-5xl font-bold text-[#0f0c0c] leading-tight tracking-tight"
             style={{ fontFamily: "'Cormorant Garamond', serif" }}
           >
-            Education that<br />saves lives.
+            {t("feat_title").split("\n").map((line, i) => (
+              <span key={i}>{line}{i === 0 && <br />}</span>
+            ))}
           </h2>
         </div>
 
         <div className="grid md:grid-cols-3 gap-px bg-[#e8d8d4]">
           {[
-            {
-              num: "01",
-              title: "Evidence-based articles",
-              desc: "Every piece of content is grounded in clinical research, written accessibly for everyone — no jargon, no fear-mongering.",
-            },
-            {
-              num: "02",
-              title: "Personal risk assessment",
-              desc: "Take our 5-minute quiz to understand your individual cardiovascular risk factors and get personalised guidance.",
-            },
-            {
-              num: "03",
-              title: "Community submissions",
-              desc: "Students, educators, and health advocates can contribute articles — reviewed before publishing to ensure quality.",
-            },
+            { num: "01", titleKey: "feat_1_title", descKey: "feat_1_desc" },
+            { num: "02", titleKey: "feat_2_title", descKey: "feat_2_desc" },
+            { num: "03", titleKey: "feat_3_title", descKey: "feat_3_desc" },
           ].map((f, i) => (
             <motion.div
               key={i}
@@ -159,42 +168,146 @@ export default function Home() {
               >
                 {f.num}
               </div>
-              <h3 className="text-base font-semibold text-[#0f0c0c] mb-2">{f.title}</h3>
-              <p className="text-sm text-[#8a7070] leading-relaxed">{f.desc}</p>
+              <h3 className="text-base font-semibold text-[#0f0c0c] mb-2">{t(f.titleKey)}</h3>
+              <p className="text-sm text-[#8a7070] leading-relaxed">{t(f.descKey)}</p>
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* ─── ARTICLES ──────────────────────────────────────────── */}
+      {/* ─── SUBMIT YOUR ARTICLE ───────────────────────────────── */}
       <section className="bg-[#0f0c0c] py-24 px-10 lg:px-16">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-16 items-start">
+
+            {/* Left — heading + description */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <p className="text-[11px] tracking-[0.14em] uppercase text-red-400 font-medium mb-4">{t("submit_badge")}</p>
+              <h2
+                className="text-5xl font-bold text-white leading-tight tracking-tight mb-6"
+                style={{ fontFamily: "'Cormorant Garamond', serif" }}
+              >
+                {t("submit_title").split("\n").map((line, i) => (
+                  <span key={i}>{line}{i === 0 && <br />}</span>
+                ))}
+              </h2>
+              <p className="text-sm text-white/45 leading-relaxed mb-8">
+                {t("submit_sub")}
+              </p>
+
+              {/* Guidelines */}
+              <div className="border border-white/[0.07] rounded-xl p-5">
+                <p className="text-[10px] tracking-widest uppercase text-white/30 mb-3">{t("submit_guidelines_title")}</p>
+                <ul className="space-y-2.5">
+                  {(["submit_g1","submit_g2","submit_g3","submit_g4"] as const).map((key) => (
+                    <li key={key} className="flex items-start gap-2.5 text-[12px] text-white/50 leading-relaxed">
+                      <span className="text-red-500 mt-0.5 flex-shrink-0">✦</span>
+                      {t(key)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </motion.div>
+
+            {/* Right — email cards */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              className="space-y-4"
+            >
+              <p className="text-[10px] tracking-widest uppercase text-white/25 mb-4">{t("submit_contact")}</p>
+
+              {EDITORS.map((editor) => (
+                <div
+                  key={editor.email}
+                  className="group rounded-2xl p-5 transition-colors"
+                  style={{
+                    background: "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.03)")}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                        style={{ background: "rgba(185,28,28,0.2)", border: "1px solid rgba(185,28,28,0.3)" }}
+                      >
+                        <Mail className="h-4 w-4 text-red-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-white">{editor.name}</p>
+                        <a
+                          href={`mailto:${editor.email}`}
+                          className="text-xs text-red-400 hover:text-red-300 transition-colors font-mono"
+                        >
+                          {editor.email}
+                        </a>
+                      </div>
+                    </div>
+                    <CopyEmailButton
+                      email={editor.email}
+                      copyLabel={t("submit_copy")}
+                      copiedLabel={t("submit_copied")}
+                    />
+                  </div>
+
+                  <a
+                    href={`mailto:${editor.email}?subject=Article Submission — Heart Matters&body=Hi ${editor.name.split(" ")[0]},%0A%0AI'd like to submit an article for Heart Matters.%0A%0ATitle: %0ACategory: %0AWord count: %0A%0A[Paste your article here]%0A%0ABio: %0A%0AThanks!`}
+                    className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-xs font-medium text-white/50 hover:text-white transition-colors cursor-pointer"
+                    style={{ background: "rgba(185,28,28,0.12)", border: "1px solid rgba(185,28,28,0.2)" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(185,28,28,0.22)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(185,28,28,0.12)")}
+                  >
+                    <Mail className="h-3.5 w-3.5 text-red-400" />
+                    <span>Open in email app →</span>
+                  </a>
+                </div>
+              ))}
+
+              <p className="text-[11px] text-white/20 text-center pt-2 leading-relaxed">
+                We review every submission within 7 days and reply to all authors.
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── ARTICLES ──────────────────────────────────────────── */}
+      <section className="bg-[#0f0c0c] py-24 px-10 lg:px-16 border-t border-white/[0.05]">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
             <div>
-              <p className="text-[11px] tracking-[0.14em] uppercase text-red-400 font-medium mb-3">Latest insights</p>
+              <p className="text-[11px] tracking-[0.14em] uppercase text-red-400 font-medium mb-3">{t("blog_badge")}</p>
               <h2
                 className="text-5xl font-bold text-white leading-tight tracking-tight"
                 style={{ fontFamily: "'Cormorant Garamond', serif" }}
               >
-                From the blog
+                {t("blog_title")}
               </h2>
-              <p className="text-sm text-white/40 mt-2 max-w-sm leading-relaxed">
-                Our most recent articles on heart health, nutrition, and well-being.
-              </p>
+              <p className="text-sm text-white/40 mt-2 max-w-sm leading-relaxed">{t("blog_sub")}</p>
             </div>
             <Link href="/articles">
               <button className="text-sm text-white/40 hover:text-white transition-colors border-b border-white/20 hover:border-white/60 pb-0.5 bg-transparent cursor-pointer whitespace-nowrap">
-                View all articles →
+                {t("blog_view_all")}
               </button>
             </Link>
           </div>
 
           {latestArticles.length === 0 ? (
             <div className="text-center py-20 border border-white/[0.07] rounded-xl">
-              <p className="text-white/30 text-sm">No articles published yet.</p>
+              <p className="text-white/30 text-sm">{t("blog_empty")}</p>
               <Link href="/articles">
                 <button className="mt-4 text-red-400 text-xs hover:text-red-300 transition-colors cursor-pointer bg-transparent border-0">
-                  Check back soon →
+                  {t("blog_check_back")}
                 </button>
               </Link>
             </div>
@@ -245,20 +358,19 @@ export default function Home() {
           transition={{ duration: 0.6 }}
           className="relative z-10"
         >
-          <p className="text-[11px] tracking-[0.14em] uppercase text-red-700 font-medium mb-4">Take action today</p>
+          <p className="text-[11px] tracking-[0.14em] uppercase text-red-700 font-medium mb-4">{t("cta_badge")}</p>
           <h2
             className="text-5xl md:text-6xl font-bold text-[#0f0c0c] leading-tight tracking-tight mb-6 max-w-2xl mx-auto"
             style={{ fontFamily: "'Cormorant Garamond', serif" }}
           >
-            Know Your Risk.<br />Protect Your Future.
+            {t("cta_title1")}<br />{t("cta_title2")}
           </h2>
           <p className="text-base text-[#8a7070] leading-relaxed max-w-md mx-auto mb-10 font-light">
-            Our comprehensive risk assessment takes less than 5 minutes and gives
-            you personalised, actionable recommendations.
+            {t("cta_sub")}
           </p>
           <Link href="/risk-assessment">
             <button className="bg-red-700 hover:bg-[#0f0c0c] transition-colors text-white text-sm font-medium px-10 py-4 rounded-full cursor-pointer">
-              Start Your Assessment
+              {t("cta_btn")}
             </button>
           </Link>
         </motion.div>
@@ -268,9 +380,7 @@ export default function Home() {
       <div className="bg-amber-50 border-t-2 border-amber-400 px-10 py-4 flex items-start gap-3">
         <span className="text-base mt-0.5">⚠️</span>
         <p className="text-xs text-amber-900 leading-relaxed">
-          <strong>Medical disclaimer:</strong> Heart Matters is an educational platform only. Nothing on this site
-          constitutes medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional
-          for any medical concerns.
+          <strong>Medical disclaimer:</strong> {t("disclaimer")}
         </p>
       </div>
 

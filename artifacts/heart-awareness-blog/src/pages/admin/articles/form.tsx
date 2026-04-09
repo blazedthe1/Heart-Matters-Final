@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useArticles, checkAdminSession, type Article } from "@/hooks/useArticles";
 import ReactMarkdown from "react-markdown";
 
-const CATEGORIES = [
+const PRESET_CATEGORIES = [
   "Prevention", "Nutrition", "Lifestyle", "Mental Health",
   "Emergency", "Research", "Exercise", "Sleep", "Stress",
 ];
@@ -47,6 +47,8 @@ export default function ArticleFormPage() {
   const [saved, setSaved] = useState(false);
   const [preview, setPreview] = useState(false);
   const [error, setError] = useState("");
+  const [customCat, setCustomCat] = useState("");
+  const isCustom = !PRESET_CATEGORIES.includes(form.category);
 
   useEffect(() => {
     if (!checkAdminSession()) {
@@ -231,12 +233,33 @@ export default function ArticleFormPage() {
               <div>
                 <label className="text-[11px] uppercase tracking-widest text-[#8a7070] font-medium mb-1.5 block">Category</label>
                 <select
-                  value={form.category}
-                  onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
+                  value={isCustom ? "__custom__" : form.category}
+                  onChange={e => {
+                    if (e.target.value === "__custom__") {
+                      setForm(p => ({ ...p, category: customCat || "" }));
+                    } else {
+                      setCustomCat("");
+                      setForm(p => ({ ...p, category: e.target.value }));
+                    }
+                  }}
                   className="w-full border border-[#e8d8d4] text-[#0f0c0c] rounded-xl px-4 py-2.5 text-sm outline-none focus:border-red-400 transition bg-white cursor-pointer"
                 >
-                  {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  {PRESET_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  <option value="__custom__">✏️ Custom category…</option>
                 </select>
+                {isCustom && (
+                  <input
+                    type="text"
+                    placeholder="Enter your category name"
+                    value={form.category}
+                    onChange={e => {
+                      setCustomCat(e.target.value);
+                      setForm(p => ({ ...p, category: e.target.value }));
+                    }}
+                    autoFocus
+                    className="mt-2 w-full border border-red-300 text-[#0f0c0c] placeholder:text-[#c0a8a8] rounded-xl px-4 py-2.5 text-sm outline-none focus:border-red-500 transition bg-red-50"
+                  />
+                )}
               </div>
 
               {/* Author */}
