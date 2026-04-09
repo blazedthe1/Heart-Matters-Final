@@ -281,8 +281,21 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ─── DIVIDER ───────────────────────────────────────────── */}
+      <div className="bg-[#0f0c0c] px-10 lg:px-16">
+        <div className="max-w-6xl mx-auto flex items-center gap-6">
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-red-900/60 to-transparent" />
+          <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/[0.08] bg-white/[0.03]">
+            <span className="w-1 h-1 rounded-full bg-red-600 animate-pulse" />
+            <span className="text-[10px] tracking-[0.2em] uppercase text-white/30 font-medium">Latest from the blog</span>
+            <span className="w-1 h-1 rounded-full bg-red-600 animate-pulse" />
+          </div>
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-red-900/60 to-transparent" />
+        </div>
+      </div>
+
       {/* ─── ARTICLES ──────────────────────────────────────────── */}
-      <section className="bg-[#0f0c0c] py-24 px-10 lg:px-16 border-t border-white/[0.05]">
+      <section className="bg-[#0f0c0c] py-24 px-10 lg:px-16">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
             <div>
