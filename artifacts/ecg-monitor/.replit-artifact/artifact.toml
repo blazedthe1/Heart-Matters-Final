@@ -1,5 +1,5 @@
 kind = "web"
-previewPath = "/"
+previewPath = "/ecg-demo/"
 title = "ECG Monitor"
 version = "1.0.0"
 id = "artifacts/ecg-monitor"
@@ -11,7 +11,7 @@ version = "1.0.0"
 
 [[services]]
 name = "web"
-paths = [ "/" ]
+paths = [ "/ecg-demo/" ]
 localPort = 19635
 
 [services.development]
@@ -28,4 +28,4 @@ to = "/index.html"
 
 [services.env]
 PORT = "19635"
-BASE_PATH = "/"
+BASE_PATH = "/ecg-demo/"

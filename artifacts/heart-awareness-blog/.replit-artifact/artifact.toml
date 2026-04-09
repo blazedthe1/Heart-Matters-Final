@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Heart Awareness Blog"
+version = "1.0.0"
+id = "artifacts/heart-awareness-blog"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25436
+
+[services.development]
+run = "pnpm --filter @workspace/heart-awareness-blog run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/heart-awareness-blog", "run", "build" ]
+publicDir = "artifacts/heart-awareness-blog/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25436"
+BASE_PATH = "/"
