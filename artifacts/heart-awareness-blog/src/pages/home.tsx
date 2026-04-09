@@ -11,13 +11,6 @@ const EDITORS = [
   { name: "Alby Anish", email: "gallantyoungman@gmail.com" },
 ];
 
-function buildMailto(email: string, firstName: string) {
-  const subject = encodeURIComponent("Article Submission - Heart Matters");
-  const body = encodeURIComponent(
-    `Hi ${firstName},\n\nI'd like to submit an article for Heart Matters.\n\nTitle: \nCategory: \nWord count: \n\n[Paste your article here]\n\nBio (one sentence about you): \n\nThanks!`
-  );
-  return `mailto:${email}?subject=${subject}&body=${body}`;
-}
 
 function CopyEmailButton({ email, copyLabel, copiedLabel }: { email: string; copyLabel: string; copiedLabel: string }) {
   const [copied, setCopied] = useState(false);
@@ -268,16 +261,6 @@ export default function Home() {
                     />
                   </div>
 
-                  <a
-                    href={buildMailto(editor.email, editor.name.split(" ")[0])}
-                    className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-xs font-medium text-white/50 hover:text-white transition-colors cursor-pointer"
-                    style={{ background: "rgba(185,28,28,0.12)", border: "1px solid rgba(185,28,28,0.2)" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(185,28,28,0.22)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(185,28,28,0.12)")}
-                  >
-                    <Mail className="h-3.5 w-3.5 text-red-400" />
-                    <span>Open in email app →</span>
-                  </a>
                 </div>
               ))}
 
