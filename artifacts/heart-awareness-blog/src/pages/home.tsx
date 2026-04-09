@@ -11,6 +11,14 @@ const EDITORS = [
   { name: "Alby Anish", email: "gallantyoungman@gmail.com" },
 ];
 
+function buildMailto(email: string, firstName: string) {
+  const subject = encodeURIComponent("Article Submission - Heart Matters");
+  const body = encodeURIComponent(
+    `Hi ${firstName},\n\nI'd like to submit an article for Heart Matters.\n\nTitle: \nCategory: \nWord count: \n\n[Paste your article here]\n\nBio (one sentence about you): \n\nThanks!`
+  );
+  return `mailto:${email}?subject=${subject}&body=${body}`;
+}
+
 function CopyEmailButton({ email, copyLabel, copiedLabel }: { email: string; copyLabel: string; copiedLabel: string }) {
   const [copied, setCopied] = useState(false);
   const copy = () => {
@@ -261,7 +269,7 @@ export default function Home() {
                   </div>
 
                   <a
-                    href={`mailto:${editor.email}?subject=Article Submission — Heart Matters&body=Hi ${editor.name.split(" ")[0]},%0A%0AI'd like to submit an article for Heart Matters.%0A%0ATitle: %0ACategory: %0AWord count: %0A%0A[Paste your article here]%0A%0ABio: %0A%0AThanks!`}
+                    href={buildMailto(editor.email, editor.name.split(" ")[0])}
                     className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-xs font-medium text-white/50 hover:text-white transition-colors cursor-pointer"
                     style={{ background: "rgba(185,28,28,0.12)", border: "1px solid rgba(185,28,28,0.2)" }}
                     onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(185,28,28,0.22)")}
