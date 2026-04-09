@@ -1,25 +1,42 @@
 import { Link, useLocation } from "wouter";
-import { Heart, Menu, X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Heart, Menu, X, Globe, ChevronDown } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
-const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/articles", label: "Articles" },
-  { href: "/risk-assessment", label: "Risk Assessment" },
-  { href: "/resources", label: "Resources" },
-  { href: "/about", label: "About" },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
+import { LANGUAGES } from "@/data/translations";
 
 export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [location] = useLocation();
+  const { lang, setLang, t } = useLanguage();
+  const langRef = useRef<HTMLDivElement>(null);
+
+  const navLinks = [
+    { href: "/", key: "nav_home" },
+    { href: "/articles", key: "nav_articles" },
+    { href: "/risk-assessment", key: "nav_risk" },
+    { href: "/resources", key: "nav_resources" },
+    { href: "/about", key: "nav_about" },
+  ];
+
+  const currentLang = LANGUAGES.find((l) => l.code === lang)!;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) {
+        setLangOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   return (
@@ -48,7 +65,7 @@ export function Navbar() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-7 text-sm font-medium">
-            {navLinks.map(link => (
+            {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -58,7 +75,7 @@ export function Navbar() {
                     : "text-white/60 hover:text-white"
                 }`}
               >
-                {link.label}
+                {t(link.key)}
                 {location === link.href && (
                   <motion.span
                     layoutId="nav-indicator"
@@ -70,13 +87,62 @@ export function Navbar() {
             ))}
           </nav>
 
-          <button
-            className="md:hidden text-white/70 hover:text-white transition-colors p-1"
-            onClick={() => setMenuOpen(v => !v)}
-            aria-label="Toggle menu"
-          >
-            {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Language switcher */}
+            <div ref={langRef} className="relative">
+              <button
+                onClick={() => setLangOpen((v) => !v)}
+                className="hidden md:flex items-center gap-1.5 text-white/50 hover:text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-white/[0.07] transition-colors cursor-pointer"
+              >
+                <Globe className="h-3.5 w-3.5" />
+                <span>{currentLang.flag} {currentLang.label}</span>
+                <ChevronDown className={`h-3 w-3 transition-transform ${langOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              <AnimatePresence>
+                {langOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full mt-2 w-40 rounded-xl overflow-hidden z-50"
+                    style={{
+                      background: "rgba(20,16,16,0.97)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+                      backdropFilter: "blur(20px)",
+                    }}
+                  >
+                    {LANGUAGES.map((l) => (
+                      <button
+                        key={l.code}
+                        onClick={() => { setLang(l.code); setLangOpen(false); }}
+                        className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs transition-colors cursor-pointer text-left ${
+                          lang === l.code
+                            ? "bg-red-700/30 text-white"
+                            : "text-white/60 hover:text-white hover:bg-white/[0.06]"
+                        }`}
+                      >
+                        <span className="text-base">{l.flag}</span>
+                        <span className="font-medium">{l.label}</span>
+                        {lang === l.code && <span className="ml-auto text-red-400">✓</span>}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Mobile burger */}
+            <button
+              className="md:hidden text-white/70 hover:text-white transition-colors p-1"
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-label="Toggle menu"
+            >
+              {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -89,14 +155,14 @@ export function Navbar() {
             transition={{ duration: 0.18 }}
             className="fixed inset-x-0 top-16 z-40 md:hidden"
             style={{
-              background: "rgba(10,8,8,0.88)",
+              background: "rgba(10,8,8,0.95)",
               backdropFilter: "blur(20px) saturate(160%)",
               WebkitBackdropFilter: "blur(20px) saturate(160%)",
               borderBottom: "1px solid rgba(255,255,255,0.07)",
             }}
           >
             <nav className="flex flex-col divide-y divide-white/[0.06]">
-              {navLinks.map(link => (
+              {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -107,9 +173,29 @@ export function Navbar() {
                   }`}
                   onClick={() => setMenuOpen(false)}
                 >
-                  {link.label}
+                  {t(link.key)}
                 </Link>
               ))}
+              {/* Language options in mobile menu */}
+              <div className="px-4 py-3">
+                <p className="text-[10px] uppercase tracking-widest text-white/25 mb-2 px-2">Language</p>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {LANGUAGES.map((l) => (
+                    <button
+                      key={l.code}
+                      onClick={() => { setLang(l.code); setMenuOpen(false); }}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                        lang === l.code
+                          ? "bg-red-700/30 text-white"
+                          : "text-white/50 hover:text-white hover:bg-white/[0.05]"
+                      }`}
+                    >
+                      <span>{l.flag}</span>
+                      <span>{l.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </nav>
           </motion.div>
         )}

@@ -33,7 +33,7 @@ export function Footer() {
         </div>
       </div>
       <div className="container mx-auto px-4 md:px-6 mt-14 pt-8 border-t border-white/[0.07] text-[11px] flex flex-col md:flex-row justify-between items-center gap-4">
-        <p>© {new Date().getFullYear()} Heart Matters — Rajagiri Public School.</p>
+        <p>© {new Date().getFullYear()} Heart Matters</p>
         <p className="max-w-lg text-center md:text-right opacity-70">
           For educational purposes only. Not a substitute for professional medical advice. Always consult your doctor.
         </p>

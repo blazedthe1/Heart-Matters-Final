@@ -136,9 +136,7 @@ export default function AdminPage() {
             </button>
           </form>
 
-          <p className="text-center text-[11px] text-white/20 mt-6">
-            Default password: <span className="font-mono text-white/35">{DEFAULT_PASSWORD}</span>
-          </p>
+
         </motion.div>
       </div>
     );

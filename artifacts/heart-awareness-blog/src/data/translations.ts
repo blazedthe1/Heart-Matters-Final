@@ -1,0 +1,110 @@
+export type LangCode = "en" | "es" | "hi" | "ml" | "fr";
+
+export const LANGUAGES: { code: LangCode; label: string; flag: string }[] = [
+  { code: "en", label: "English", flag: "🇬🇧" },
+  { code: "es", label: "Español", flag: "🇪🇸" },
+  { code: "hi", label: "हिन्दी", flag: "🇮🇳" },
+  { code: "ml", label: "മലയാളം", flag: "🇮🇳" },
+  { code: "fr", label: "Français", flag: "🇫🇷" },
+];
+
+export const T: Record<string, Record<LangCode, string>> = {
+  nav_home:        { en: "Home",            es: "Inicio",         hi: "होम",           ml: "ഹോം",           fr: "Accueil" },
+  nav_articles:    { en: "Articles",        es: "Artículos",      hi: "लेख",           ml: "ലേഖനങ്ങൾ",      fr: "Articles" },
+  nav_risk:        { en: "Risk Assessment", es: "Evaluación",     hi: "जोखिम मूल्यांकन", ml: "റിസ്ക് അസസ്മെന്റ്", fr: "Évaluation" },
+  nav_resources:   { en: "Resources",       es: "Recursos",       hi: "संसाधन",         ml: "റിസോഴ്സുകൾ",    fr: "Ressources" },
+  nav_about:       { en: "About",           es: "Sobre nosotros", hi: "हमारे बारे में",  ml: "ഞങ്ങളെ കുറിച്ച്", fr: "À propos" },
+
+  hero_badge:      { en: "Student-led CVD Prevention", es: "Prevención CVD liderada por estudiantes", hi: "छात्र-नेतृत्व CVD रोकथाम", ml: "വിദ്യാർഥി-നേതൃത്വ CVD പ്രതിരോധം", fr: "Prévention CVD menée par les étudiants" },
+  hero_title1:     { en: "Listen to the",  es: "Escucha el",     hi: "सुनिए अपने",    ml: "ശ്രദ്ധിക്കൂ",    fr: "Écoutez le" },
+  hero_title2:     { en: "rhythm",         es: "ritmo",          hi: "ताल",           ml: "താളം",          fr: "rythme" },
+  hero_title3:     { en: "of your life.",  es: "de tu vida.",    hi: "अपने जीवन का।",  ml: "നിങ്ങളുടെ ജീവിതത്തിന്റെ.", fr: "de votre vie." },
+  hero_sub:        {
+    en: "A student-driven platform bringing cardiovascular health education to everyone — clear, compassionate, and evidence-based.",
+    es: "Una plataforma estudiantil que lleva la educación cardiovascular a todos — clara, compasiva y basada en evidencia.",
+    hi: "एक छात्र-संचालित प्लेटफॉर्म जो सभी के लिए हृदय स्वास्थ्य शिक्षा लाता है — स्पष्ट, दयालु और साक्ष्य-आधारित।",
+    ml: "എല്ലാവർക്കും ഹൃദയ ആരോഗ്യ വിദ്യാഭ്യാസം നൽകുന്ന ഒരു വിദ്യാർഥി-ചാലിത പ്ലാറ്റ്ഫോം — വ്യക്തം, കരുണാർദ്രം, തെളിവ്-അടിസ്ഥാനം.",
+    fr: "Une plateforme étudiante qui apporte l'éducation cardiovasculaire à tous — claire, bienveillante et fondée sur des preuves.",
+  },
+  hero_cta1:       { en: "Take the Risk Quiz",  es: "Hacer el cuestionario", hi: "जोखिम प्रश्नोत्तरी लें", ml: "ക്വിസ് ചെയ്യൂ",  fr: "Passer le quiz" },
+  hero_cta2:       { en: "Read Articles",       es: "Leer artículos",        hi: "लेख पढ़ें",             ml: "ലേഖനങ്ങൾ വായിക്കൂ", fr: "Lire les articles" },
+
+  stats_1_label:   { en: "Cardiovascular deaths globally each year",    es: "Muertes cardiovasculares anuales en el mundo",  hi: "हर साल वैश्विक हृदय रोग मौतें",            ml: "ആഗോളമായി ഓരോ വർഷവും ഹൃദ്രോഗ മരണങ്ങൾ",       fr: "Décès cardiovasculaires dans le monde chaque année" },
+  stats_1_tag:     { en: "Leading cause of mortality",                  es: "Principal causa de mortalidad",                hi: "मृत्यु का प्रमुख कारण",                      ml: "മരണത്തിന്റെ പ്രധാന കാരണം",                      fr: "Première cause de mortalité" },
+  stats_2_label:   { en: "Of premature CVD cases are preventable",      es: "De los casos de ECV prematura son prevenibles", hi: "समय से पहले CVD मामले रोके जा सकते हैं",     ml: "അകാല CVD കേസുകൾ തടയാനാകും",                    fr: "Des cas de MCV prématurés sont évitables" },
+  stats_2_tag:     { en: "Through lifestyle changes",                   es: "Mediante cambios de estilo de vida",            hi: "जीवनशैली में बदलाव के माध्यम से",             ml: "ജീവിതശൈലി മാറ്റങ്ങളിലൂടെ",                     fr: "Grâce à des changements de mode de vie" },
+  stats_3_label:   { en: "CVD is the world's single biggest killer",    es: "Las ECV son la mayor causa de muerte mundial",  hi: "CVD दुनिया का सबसे बड़ा हत्यारा है",           ml: "CVD ലോകത്തിലെ ഏറ്റവും വലിയ ഘാതകൻ",             fr: "Les MCV sont le plus grand tueur mondial" },
+  stats_3_tag:     { en: "Knowledge is your defense",                   es: "El conocimiento es tu defensa",                hi: "ज्ञान आपका बचाव है",                          ml: "അറിവ് നിങ്ങളുടെ രക്ഷ",                          fr: "La connaissance est votre défense" },
+
+  feat_badge:      { en: "What we do",           es: "Lo que hacemos",         hi: "हम क्या करते हैं",   ml: "ഞങ്ങൾ ചെയ്യുന്നത്",    fr: "Ce que nous faisons" },
+  feat_title:      { en: "Education that\nsaves lives.", es: "Educación que\nsalva vidas.", hi: "शिक्षा जो\nजीवन बचाती है।", ml: "ജീവൻ രക്ഷിക്കുന്ന\nവിദ്യാഭ്യാസം.", fr: "Une éducation qui\nsauve des vies." },
+  feat_1_title:    { en: "Evidence-based articles",   es: "Artículos basados en evidencia", hi: "साक्ष्य-आधारित लेख",     ml: "തെളിവ്-അടിസ്ഥാന ലേഖനങ്ങൾ", fr: "Articles fondés sur des preuves" },
+  feat_1_desc:     {
+    en: "Every piece of content is grounded in clinical research, written accessibly for everyone — no jargon, no fear-mongering.",
+    es: "Todo el contenido se basa en investigación clínica, escrito de forma accesible para todos — sin tecnicismos ni alarmismo.",
+    hi: "सभी सामग्री नैदानिक शोध पर आधारित है, सभी के लिए सुलभ रूप से लिखी गई — कोई शब्दजाल नहीं।",
+    ml: "എല്ലാ ഉള്ളടക്കവും ക്ലിനിക്കൽ ഗവേഷണത്തെ അടിസ്ഥാനമാക്കിയുള്ളതാണ് — ലളിതമായി, ഭയമില്ലാതെ.",
+    fr: "Tout le contenu est fondé sur la recherche clinique, rédigé de manière accessible — sans jargon ni alarmisme.",
+  },
+  feat_2_title:    { en: "Personal risk assessment", es: "Evaluación de riesgo personal", hi: "व्यक्तिगत जोखिम मूल्यांकन", ml: "വ്യക്തിഗത റിസ്ക് മൂല്യനിർണ്ണയം", fr: "Évaluation personnelle du risque" },
+  feat_2_desc:     {
+    en: "Take our 5-minute quiz to understand your individual cardiovascular risk factors and get personalised guidance.",
+    es: "Haz nuestro cuestionario de 5 minutos para entender tus factores de riesgo cardiovascular individuales.",
+    hi: "अपने हृदय जोखिम कारकों को समझने और व्यक्तिगत मार्गदर्शन पाने के लिए हमारा 5 मिनट का प्रश्नोत्तरी लें।",
+    ml: "നിങ്ങളുടെ ഹൃദ്രോഗ അപകടഘടകങ്ങൾ മനസ്സിലാക്കാൻ 5 മിനിറ്റ് ക്വിസ് ചെയ്യൂ.",
+    fr: "Faites notre quiz de 5 minutes pour comprendre vos facteurs de risque cardiovasculaires personnels.",
+  },
+  feat_3_title:    { en: "Community submissions", es: "Envíos de la comunidad", hi: "सामुदायिक सबमिशन", ml: "കമ്മ്യൂണിറ്റി സബ്മിഷനുകൾ", fr: "Contributions communautaires" },
+  feat_3_desc:     {
+    en: "Students, educators, and health advocates can contribute articles — reviewed before publishing to ensure quality.",
+    es: "Estudiantes, educadores y defensores de la salud pueden contribuir con artículos, revisados antes de publicarse.",
+    hi: "छात्र, शिक्षक और स्वास्थ्य समर्थक लेख योगदान कर सकते हैं — गुणवत्ता सुनिश्चित करने के लिए समीक्षा की जाती है।",
+    ml: "വിദ്യാർഥികൾ, അദ്ധ്യാപകർ, ആരോഗ്യ വക്താക്കൾ എന്നിവർക്ക് ലേഖനങ്ങൾ സംഭാവന ചെയ്യാം — ഗുണനിലവാരം ഉറപ്പാക്കാൻ അവലോകനം ചെയ്യുന്നു.",
+    fr: "Les étudiants, éducateurs et défenseurs de la santé peuvent contribuer des articles, examinés avant publication.",
+  },
+
+  submit_badge:    { en: "Write for us",          es: "Escribe para nosotros",   hi: "हमारे लिए लिखें",       ml: "ഞങ്ങൾക്കുവേണ്ടി എഴുതൂ",  fr: "Écrire pour nous" },
+  submit_title:    { en: "Got something to\nshare?", es: "¿Tienes algo que\ncompartir?", hi: "कुछ साझा करना\nचाहते हैं?", ml: "എന്തെങ്കിലും\nപങ്കിടണോ?", fr: "Quelque chose à\npartager?" },
+  submit_sub:      {
+    en: "We welcome articles from students, educators, doctors, and anyone passionate about cardiovascular health. Send your draft to either of our editors and we'll review it within a week.",
+    es: "Damos la bienvenida a artículos de estudiantes, educadores, médicos y cualquier apasionado de la salud cardiovascular. Envía tu borrador a cualquiera de nuestros editores.",
+    hi: "हम छात्रों, शिक्षकों, डॉक्टरों और हृदय स्वास्थ्य के प्रति उत्साही लोगों के लेखों का स्वागत करते हैं। अपना मसौदा हमारे किसी संपादक को भेजें।",
+    ml: "വിദ്യാർഥികൾ, അദ്ധ്യാപകർ, ഡോക്ടർമാർ, ഹൃദ്രോഗ ആരോഗ്യത്തിൽ താൽപ്പര്യമുള്ളവർ — എല്ലാവരേയും ഞങ്ങൾ സ്വാഗതം ചെയ്യുന്നു.",
+    fr: "Nous accueillons des articles d'étudiants, d'éducateurs, de médecins et de toute personne passionnée par la santé cardiovasculaire.",
+  },
+  submit_guidelines_title: { en: "Submission guidelines", es: "Pautas de envío", hi: "सबमिशन दिशानिर्देश", ml: "സബ്മിഷൻ മാർഗ്ഗനിർദ്ദേശങ്ങൾ", fr: "Directives de soumission" },
+  submit_g1:       { en: "Minimum 300 words, maximum 2000 words", es: "Mínimo 300 palabras, máximo 2000", hi: "न्यूनतम 300 शब्द, अधिकतम 2000 शब्द", ml: "കുറഞ്ഞത് 300 വാക്കുകൾ, പരമാവധി 2000", fr: "Minimum 300 mots, maximum 2000 mots" },
+  submit_g2:       { en: "Include at least one credible source or citation", es: "Incluye al menos una fuente creíble", hi: "कम से कम एक विश्वसनीय स्रोत शामिल करें", ml: "കുറഞ്ഞത് ഒരു വിശ്വസനീയ സ്രോതസ്സ് ഉൾപ്പെടുത്തുക", fr: "Inclure au moins une source crédible" },
+  submit_g3:       { en: "Plain language — no excessive medical jargon", es: "Lenguaje claro — sin jerga médica excesiva", hi: "सरल भाषा — अत्यधिक चिकित्सा शब्दजाल नहीं", ml: "ലളിതഭാഷ — അധിക മെഡിക്കൽ ഭാഷ ഒഴിവാക്കുക", fr: "Langage clair — pas de jargon médical excessif" },
+  submit_g4:       { en: "Your name and a one-line bio", es: "Tu nombre y una breve biografía", hi: "आपका नाम और एक-पंक्ति जीवनी", ml: "നിങ്ങളുടെ പേരും ഒരു-വരി ബയോയും", fr: "Votre nom et une courte biographie" },
+  submit_contact:  { en: "Send your article to:", es: "Envía tu artículo a:", hi: "अपना लेख भेजें:", ml: "ലേഖനം അയക്കൂ:", fr: "Envoyez votre article à:" },
+  submit_copy:     { en: "Copy", es: "Copiar", hi: "कॉपी", ml: "കോപ്പി", fr: "Copier" },
+  submit_copied:   { en: "Copied!", es: "¡Copiado!", hi: "कॉपी किया!", ml: "കോപ്പി ചെയ്തു!", fr: "Copié!" },
+
+  blog_badge:      { en: "Latest insights",      es: "Últimas novedades",       hi: "नवीनतम अंतर्दृष्टि",    ml: "ഏറ്റവും പുതിയ ലേഖനങ്ങൾ",   fr: "Dernières analyses" },
+  blog_title:      { en: "From the blog",        es: "Del blog",                hi: "ब्लॉग से",              ml: "ബ്ലോഗിൽ നിന്ന്",            fr: "Du blog" },
+  blog_sub:        { en: "Our most recent articles on heart health, nutrition, and well-being.", es: "Nuestros artículos más recientes sobre salud cardíaca, nutrición y bienestar.", hi: "हृदय स्वास्थ्य, पोषण और कल्याण पर हमारे नवीनतम लेख।", ml: "ഹൃദ്രോഗ ആരോഗ്യം, പോഷണം, ക്ഷേമം എന്നിവയെക്കുറിച്ചുള്ള ഏറ്റവും പുതിയ ലേഖനങ്ങൾ.", fr: "Nos articles les plus récents sur la santé cardiaque, la nutrition et le bien-être." },
+  blog_view_all:   { en: "View all articles →",  es: "Ver todos →",             hi: "सभी लेख देखें →",        ml: "എല്ലാം കാണൂ →",             fr: "Voir tous les articles →" },
+  blog_empty:      { en: "No articles published yet.", es: "Aún no hay artículos publicados.", hi: "अभी तक कोई लेख प्रकाशित नहीं हुआ।", ml: "ഇതുവരെ ലേഖനങ്ങൾ ഒന്നും പ്രസിദ്ധീകരിച്ചിട്ടില്ല.", fr: "Aucun article publié pour l'instant." },
+  blog_check_back: { en: "Check back soon →",    es: "Vuelve pronto →",          hi: "जल्द वापस देखें →",      ml: "ഉടൻ തിരികെ നോക്കൂ →",       fr: "Revenez bientôt →" },
+
+  cta_badge:       { en: "Take action today",    es: "Actúa hoy",               hi: "आज कार्य करें",          ml: "ഇന്നുതന്നെ നടപടി സ്വീകരിക്കൂ", fr: "Agissez aujourd'hui" },
+  cta_title1:      { en: "Know Your Risk.",      es: "Conoce tu riesgo.",        hi: "अपना जोखिम जानें।",     ml: "നിങ്ങളുടെ അപകടം അറിയൂ.",    fr: "Connaissez votre risque." },
+  cta_title2:      { en: "Protect Your Future.", es: "Protege tu futuro.",       hi: "अपने भविष्य की रक्षा करें।", ml: "നിങ്ങളുടെ ഭാവി സംരക്ഷിക്കൂ.", fr: "Protégez votre avenir." },
+  cta_sub:         {
+    en: "Our comprehensive risk assessment takes less than 5 minutes and gives you personalised, actionable recommendations.",
+    es: "Nuestra evaluación integral toma menos de 5 minutos y te da recomendaciones personalizadas y prácticas.",
+    hi: "हमारा व्यापक जोखिम मूल्यांकन 5 मिनट से कम लेता है और आपको व्यक्तिगत, कार्रवाई योग्य सिफारिशें देता है।",
+    ml: "ഞങ്ങളുടെ ഹൃദ്രോഗ അപകട മൂല്യനിർണ്ണയം 5 മിനിറ്റിൽ താഴെ ആണ് — വ്യക്തിഗത ശുപാർശകൾ ലഭിക്കും.",
+    fr: "Notre évaluation complète prend moins de 5 minutes et vous donne des recommandations personnalisées et concrètes.",
+  },
+  cta_btn:         { en: "Start Your Assessment", es: "Iniciar la evaluación", hi: "मूल्यांकन शुरू करें", ml: "മൂല്യനിർണ്ണയം ആരംഭിക്കൂ", fr: "Commencer l'évaluation" },
+
+  disclaimer:      {
+    en: "Medical disclaimer: Heart Matters is an educational platform only. Nothing on this site constitutes medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional for any medical concerns.",
+    es: "Aviso médico: Heart Matters es solo una plataforma educativa. Nada en este sitio constituye asesoramiento, diagnóstico o tratamiento médico. Consulta siempre a un profesional de la salud calificado.",
+    hi: "चिकित्सा अस्वीकरण: Heart Matters केवल एक शैक्षिक प्लेटफॉर्म है। इस साइट पर कुछ भी चिकित्सा सलाह, निदान या उपचार नहीं है। किसी भी चिकित्सा संबंधी चिंता के लिए हमेशा योग्य स्वास्थ्य पेशेवर से परामर्श करें।",
+    ml: "മെഡിക്കൽ നിരാകരണം: Heart Matters ഒരു വിദ്യാഭ്യാസ പ്ലാറ്റ്ഫോം മാത്രമാണ്. ഇവിടെ ഒന്നും വൈദ്യ ഉപദേശം, രോഗനിർണ്ണയം, ചികിത്സ എന്നിവ ഇല്ല. ഏതെങ്കിലും ആരോഗ്യ ആശങ്കകൾക്ക് ഒരു യോഗ്യതയുള്ള ഡോക്ടറെ കണ്ടാലും.",
+    fr: "Avertissement médical : Heart Matters est une plateforme éducative uniquement. Rien sur ce site ne constitue un conseil médical, un diagnostic ou un traitement. Consultez toujours un professionnel de santé qualifié.",
+  },
+};
