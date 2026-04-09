@@ -7,8 +7,8 @@ import { getPublishedArticles, type Article } from "@/hooks/useArticles";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const EDITORS = [
-  { name: "Mishal Nediyodath", email: "mishal.nediyodath@gmail.com" },
-  { name: "Gallant Youngman", email: "gallantyoungman@gmail.com" },
+  { name: "Mishal Mohamed", email: "mishal.nediyodath@gmail.com" },
+  { name: "Alby Anish", email: "gallantyoungman@gmail.com" },
 ];
 
 function CopyEmailButton({ email, copyLabel, copiedLabel }: { email: string; copyLabel: string; copiedLabel: string }) {
