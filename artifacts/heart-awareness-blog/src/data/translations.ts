@@ -94,6 +94,9 @@ export const T: Record<string, Record<LangCode, string>> = {
   submit_copied:  { en:"Copied!",   es:"¡Copiado!", hi:"कॉपी किया!",   ml:"കോപ്പി ചെയ്തു!",  fr:"Copié!",   ar:"تم النسخ!" },
   submit_review:  { en:"We review every submission within 7 days and reply to all authors.", es:"Revisamos cada envío en 7 días y respondemos a todos.", hi:"हम हर सबमिशन की 7 दिनों में समीक्षा करते हैं।", ml:"ഞങ്ങൾ ഓരോ സബ്മിഷനും 7 ദിവസത്തിനുള്ളിൽ അവലോകനം ചെയ്യുന്നു.", fr:"Nous examinons chaque soumission dans les 7 jours.", ar:"نراجع كل تقديم خلال 7 أيام ونرد على جميع المؤلفين." },
 
+  /* ── Home divider ───────────────────────────────────────────────── */
+  divider_latest: { en:"Latest from the blog", es:"Lo último del blog", hi:"ब्लॉग से नवीनतम", ml:"ബ്ലോഗിൽ നിന്ന് ഏറ്റവും പുതിയത്", fr:"Les derniers du blog", ar:"الأحدث من المدونة" },
+
   /* ── Home blog strip ────────────────────────────────────────────── */
   blog_badge:      { en:"Latest insights",   es:"Últimas novedades",    hi:"नवीनतम अंतर्दृष्टि",  ml:"ഏറ്റവും പുതിയ ലേഖനങ്ങൾ",  fr:"Dernières analyses",   ar:"أحدث المقالات" },
   blog_title:      { en:"From the blog",     es:"Del blog",             hi:"ब्लॉग से",             ml:"ബ്ലോഗിൽ നിന്ന്",           fr:"Du blog",              ar:"من المدونة" },

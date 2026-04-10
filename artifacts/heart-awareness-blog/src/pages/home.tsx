@@ -298,7 +298,7 @@ export default function Home() {
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-red-900/60 to-transparent" />
           <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/[0.08] bg-white/[0.03]">
             <span className="w-1 h-1 rounded-full bg-red-600 animate-pulse" />
-            <span className="text-[10px] tracking-[0.2em] uppercase text-white/30 font-medium">Latest from the blog</span>
+            <span className="text-[10px] tracking-[0.2em] uppercase text-white/30 font-medium">{t("divider_latest")}</span>
             <span className="w-1 h-1 rounded-full bg-red-600 animate-pulse" />
           </div>
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-red-900/60 to-transparent" />
