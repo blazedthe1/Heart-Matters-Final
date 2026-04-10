@@ -6,12 +6,14 @@ import ReactMarkdown from "react-markdown";
 import { useState, useEffect } from "react";
 import { type Article, getPublishedArticles } from "@/hooks/useArticles";
 import { format } from "date-fns";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ArticleDetail() {
   const [, params] = useRoute("/articles/:slug");
   const slug = params?.slug || "";
   const [article, setArticle] = useState<Article | undefined>(undefined);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const found = getPublishedArticles().find(a => a.slug === slug);
@@ -27,9 +29,7 @@ export default function ArticleDetail() {
     );
   }
 
-  if (!article) {
-    return <NotFound />;
-  }
+  if (!article) return <NotFound />;
 
   return (
     <article className="min-h-screen bg-[#faf8f5] pb-24 font-['Outfit',sans-serif]">
@@ -38,26 +38,16 @@ export default function ArticleDetail() {
         <div className="container mx-auto px-4 md:px-6 max-w-3xl">
           <Link href="/articles" className="inline-flex items-center text-sm text-white/40 hover:text-white transition-colors mb-8 gap-1.5">
             <ArrowLeft className="h-3.5 w-3.5" />
-            Back to articles
+            {t("art_back")}
           </Link>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <p className="text-[10px] tracking-[0.14em] uppercase text-red-400 font-medium mb-5">
-              {article.category}
-            </p>
-            <h1
-              className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight mb-6"
-              style={{ fontFamily: "'Cormorant Garamond', serif" }}
-            >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+            <p className="text-[10px] tracking-[0.14em] uppercase text-red-400 font-medium mb-5">{article.category}</p>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight mb-6"
+              style={{ fontFamily: "'Cormorant Garamond', serif" }}>
               {article.title}
             </h1>
-            <p className="text-base text-white/45 leading-relaxed mb-8 font-light max-w-2xl">
-              {article.excerpt}
-            </p>
+            <p className="text-base text-white/45 leading-relaxed mb-8 font-light max-w-2xl">{article.excerpt}</p>
 
             <div className="flex flex-wrap items-center gap-6 text-xs text-white/30 pt-6 border-t border-white/[0.07]">
               <div className="flex items-center gap-1.5">
@@ -76,9 +66,7 @@ export default function ArticleDetail() {
 
       <div className="container mx-auto px-4 md:px-6 max-w-3xl pt-14">
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3, duration: 0.8 }}
           className="prose prose-lg max-w-none
             prose-headings:font-bold prose-headings:text-[#0f0c0c] prose-headings:tracking-tight
             prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-5
@@ -94,19 +82,14 @@ export default function ArticleDetail() {
         <div className="mt-16 pt-8 border-t border-[#e8d8d4]">
           <div className="bg-[#0f0c0c] rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
-              <h3
-                className="text-2xl font-bold text-white mb-2"
-                style={{ fontFamily: "'Cormorant Garamond', serif" }}
-              >
-                Concerned about your heart health?
+              <h3 className="text-2xl font-bold text-white mb-2" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                {t("art_cta_title")}
               </h3>
-              <p className="text-sm text-white/45 font-light">
-                Take our 5-minute risk assessment to get personalised recommendations.
-              </p>
+              <p className="text-sm text-white/45 font-light">{t("art_cta_sub")}</p>
             </div>
             <Link href="/risk-assessment" className="shrink-0">
               <button className="bg-red-700 hover:bg-white hover:text-[#0f0c0c] text-white text-sm font-medium px-8 py-3.5 rounded-full transition-colors cursor-pointer whitespace-nowrap">
-                Start Assessment
+                {t("art_cta_btn")}
               </button>
             </Link>
           </div>
