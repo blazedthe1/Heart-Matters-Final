@@ -1,344 +1,440 @@
-import { useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useLanguage } from "@/contexts/LanguageContext";
 
-/* ─── Blood Pressure Checker ─────────────────────────────────────── */
+/* ─── Game constants ─────────────────────────────────────────────── */
 
-type BPCategory = "normal" | "elevated" | "high1" | "high2" | "crisis";
+const W = 480;
+const H = 600;
+const PLAYER_W = 52;
+const PLAYER_H = 52;
+const PLAYER_Y = H - 80;
+const PLAYER_SPEED = 6;
+const INITIAL_DROP_SPEED = 2.4;
+const SPEED_INCREMENT = 0.00018;
+const SPAWN_INTERVAL_MS = 1100;
 
-function classifyBP(sys: number, dia: number): BPCategory {
-  if (sys > 180 || dia > 120) return "crisis";
-  if (sys >= 140 || dia >= 90) return "high2";
-  if (sys >= 130 || dia >= 80) return "high1";
-  if (sys >= 120 && dia < 80) return "elevated";
-  return "normal";
+const GOOD = ["🥦", "🍎", "💧", "🏃", "🥕", "🫐"];
+const BAD  = ["🍔", "🍟", "🚬", "🍕", "🥤", "😰"];
+
+interface Item {
+  id: number;
+  x: number;
+  y: number;
+  emoji: string;
+  good: boolean;
+  size: number;
 }
 
-const BP_CONFIG: Record<BPCategory, { colorClass: string; bgClass: string; borderClass: string; dot: string }> = {
-  normal:   { colorClass: "text-emerald-400", bgClass: "bg-emerald-950/60",  borderClass: "border-emerald-600/40", dot: "bg-emerald-400" },
-  elevated: { colorClass: "text-yellow-400",  bgClass: "bg-yellow-950/60",   borderClass: "border-yellow-600/40",  dot: "bg-yellow-400" },
-  high1:    { colorClass: "text-orange-400",  bgClass: "bg-orange-950/60",   borderClass: "border-orange-600/40",  dot: "bg-orange-400" },
-  high2:    { colorClass: "text-red-400",     bgClass: "bg-red-950/60",      borderClass: "border-red-600/40",     dot: "bg-red-400"    },
-  crisis:   { colorClass: "text-rose-300",    bgClass: "bg-rose-950/80",     borderClass: "border-rose-500/60",    dot: "bg-rose-300"   },
-};
+interface Particle {
+  id: number;
+  x: number;
+  y: number;
+  emoji: string;
+  vx: number;
+  vy: number;
+  life: number;
+  maxLife: number;
+}
 
-function BloodPressureChecker() {
-  const { t } = useLanguage();
-  const [sys, setSys] = useState("");
-  const [dia, setDia] = useState("");
-  const [result, setResult] = useState<BPCategory | null>(null);
+let idCounter = 0;
+const nextId = () => ++idCounter;
 
-  const handleCheck = () => {
-    const s = parseInt(sys, 10);
-    const d = parseInt(dia, 10);
-    if (!isNaN(s) && !isNaN(d) && s > 0 && d > 0) {
-      setResult(classifyBP(s, d));
+/* ─── useGame hook ───────────────────────────────────────────────── */
+
+type Phase = "idle" | "playing" | "over";
+
+function useGame(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
+  const state = useRef({
+    phase: "idle" as Phase,
+    playerX: W / 2 - PLAYER_W / 2,
+    left: false,
+    right: false,
+    items: [] as Item[],
+    particles: [] as Particle[],
+    score: 0,
+    lives: 3,
+    speed: INITIAL_DROP_SPEED,
+    frame: 0,
+    lastSpawn: 0,
+    shakeFrames: 0,
+  });
+
+  const [display, setDisplay] = useState({ score: 0, lives: 3, phase: "idle" as Phase, hiScore: 0 });
+  const hiScoreRef = useRef(0);
+  const rafRef = useRef(0);
+  const spawnTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /* spawn items */
+  const scheduleSpawn = useCallback(() => {
+    if (state.current.phase !== "playing") return;
+    const interval = Math.max(500, SPAWN_INTERVAL_MS - state.current.frame * 0.06);
+    spawnTimerRef.current = setTimeout(() => {
+      if (state.current.phase !== "playing") return;
+      const good = Math.random() > 0.42;
+      const pool = good ? GOOD : BAD;
+      const emoji = pool[Math.floor(Math.random() * pool.length)];
+      state.current.items.push({
+        id: nextId(),
+        x: 24 + Math.random() * (W - 72),
+        y: -40,
+        emoji,
+        good,
+        size: 34,
+      });
+      scheduleSpawn();
+    }, interval);
+  }, []);
+
+  const startGame = useCallback(() => {
+    const s = state.current;
+    s.phase = "playing";
+    s.playerX = W / 2 - PLAYER_W / 2;
+    s.items = [];
+    s.particles = [];
+    s.score = 0;
+    s.lives = 3;
+    s.speed = INITIAL_DROP_SPEED;
+    s.frame = 0;
+    s.shakeFrames = 0;
+    setDisplay({ score: 0, lives: 3, phase: "playing", hiScore: hiScoreRef.current });
+    scheduleSpawn();
+  }, [scheduleSpawn]);
+
+  const endGame = useCallback(() => {
+    const s = state.current;
+    s.phase = "over";
+    if (s.score > hiScoreRef.current) hiScoreRef.current = s.score;
+    if (spawnTimerRef.current) clearTimeout(spawnTimerRef.current);
+    setDisplay(d => ({ ...d, score: s.score, lives: s.lives, phase: "over", hiScore: hiScoreRef.current }));
+  }, []);
+
+  /* draw */
+  const draw = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const s = state.current;
+
+    s.frame++;
+    s.speed = INITIAL_DROP_SPEED + s.frame * SPEED_INCREMENT;
+
+    /* move player */
+    if (s.left)  s.playerX = Math.max(0, s.playerX - PLAYER_SPEED);
+    if (s.right) s.playerX = Math.min(W - PLAYER_W, s.playerX + PLAYER_SPEED);
+
+    /* move items */
+    s.items.forEach(item => { item.y += s.speed; });
+
+    /* collision + off-screen */
+    const px = s.playerX, py = PLAYER_Y;
+    s.items = s.items.filter(item => {
+      const hit = (
+        item.x + item.size > px + 6 &&
+        item.x < px + PLAYER_W - 6 &&
+        item.y + item.size > py + 6 &&
+        item.y < py + PLAYER_H - 6
+      );
+      if (hit) {
+        /* burst particles */
+        for (let i = 0; i < 6; i++) {
+          s.particles.push({
+            id: nextId(),
+            x: item.x + item.size / 2,
+            y: item.y + item.size / 2,
+            emoji: item.emoji,
+            vx: (Math.random() - 0.5) * 5,
+            vy: -Math.random() * 4 - 2,
+            life: 28,
+            maxLife: 28,
+          });
+        }
+        if (item.good) {
+          s.score += 10;
+          setDisplay(d => ({ ...d, score: s.score }));
+        } else {
+          s.lives -= 1;
+          s.shakeFrames = 14;
+          setDisplay(d => ({ ...d, lives: s.lives }));
+          if (s.lives <= 0) { endGame(); return false; }
+        }
+        return false;
+      }
+      if (item.y > H + 20) return false;
+      return true;
+    });
+
+    /* update particles */
+    s.particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.life--; });
+    s.particles = s.particles.filter(p => p.life > 0);
+
+    if (s.shakeFrames > 0) s.shakeFrames--;
+
+    /* ── render ── */
+    const shakeX = s.shakeFrames > 0 ? (Math.random() - 0.5) * 6 : 0;
+    const shakeY = s.shakeFrames > 0 ? (Math.random() - 0.5) * 6 : 0;
+    ctx.save();
+    ctx.translate(shakeX, shakeY);
+
+    /* background */
+    ctx.fillStyle = "#0f0c0c";
+    ctx.fillRect(-10, -10, W + 20, H + 20);
+
+    /* lane guides */
+    ctx.strokeStyle = "rgba(255,255,255,0.03)";
+    ctx.lineWidth = 1;
+    for (let x = 80; x < W; x += 80) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
     }
-  };
 
-  const cfg = result ? BP_CONFIG[result] : null;
-  const labelKey = result ? (`int_bp_${result}` as const) : null;
-  const descKey  = result ? (`int_bp_${result}_desc` as const) : null;
+    /* ground line */
+    const grad = ctx.createLinearGradient(0, 0, W, 0);
+    grad.addColorStop(0, "transparent");
+    grad.addColorStop(0.5, "rgba(185,28,28,0.5)");
+    grad.addColorStop(1, "transparent");
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, PLAYER_Y + PLAYER_H + 4); ctx.lineTo(W, PLAYER_Y + PLAYER_H + 4); ctx.stroke();
 
-  return (
-    <ToolCard num="01" titleKey="int_bp_title" descKey="int_bp_desc">
-      <div className="grid sm:grid-cols-2 gap-4 mb-5">
-        {[
-          { labelKey: "int_bp_systolic",  value: sys, set: setSys,  placeholder: "120" },
-          { labelKey: "int_bp_diastolic", value: dia, set: setDia,  placeholder: "80"  },
-        ].map(({ labelKey: lk, value, set, placeholder }) => (
-          <div key={lk}>
-            <label className="block text-xs text-white/50 mb-1.5 tracking-wide">{t(lk)}</label>
-            <input
-              type="number"
-              min={1}
-              max={300}
-              value={value}
-              onChange={(e) => { set(e.target.value); setResult(null); }}
-              placeholder={placeholder}
-              className="w-full bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-red-500/60 transition-colors"
-            />
-          </div>
-        ))}
-      </div>
+    /* items */
+    ctx.font = "34px serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    s.items.forEach(item => {
+      ctx.globalAlpha = 1;
+      ctx.fillText(item.emoji, item.x + item.size / 2, item.y + item.size / 2);
+    });
 
-      <button
-        onClick={handleCheck}
-        disabled={!sys || !dia}
-        className="w-full bg-red-700 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-white text-sm font-medium py-3 rounded-xl cursor-pointer"
-      >
-        {t("int_bp_submit")}
-      </button>
+    /* particles */
+    s.particles.forEach(p => {
+      ctx.globalAlpha = p.life / p.maxLife;
+      ctx.font = "20px serif";
+      ctx.fillText(p.emoji, p.x, p.y);
+    });
+    ctx.globalAlpha = 1;
 
-      <AnimatePresence>
-        {result && cfg && labelKey && descKey && (
-          <motion.div
-            key={result}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.3 }}
-            className={`mt-5 rounded-2xl p-5 border ${cfg.bgClass} ${cfg.borderClass}`}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <span className={`w-2 h-2 rounded-full ${cfg.dot} animate-pulse`} />
-              <span className={`text-sm font-bold ${cfg.colorClass}`}>{t(labelKey)}</span>
-            </div>
-            <p className="text-sm text-white/60 leading-relaxed">{t(descKey)}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </ToolCard>
-  );
-}
+    /* player heart */
+    const heartPulse = 1 + Math.sin(s.frame * 0.18) * 0.05;
+    ctx.font = `${Math.round(PLAYER_H * heartPulse)}px serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
 
-/* ─── Heart Rate Zone Calculator ─────────────────────────────────── */
+    /* glow */
+    ctx.shadowColor = s.shakeFrames > 0 ? "#dc2626" : "#f43f5e";
+    ctx.shadowBlur = s.shakeFrames > 0 ? 24 : 14;
+    ctx.fillText("❤️", s.playerX + PLAYER_W / 2, PLAYER_Y + PLAYER_H / 2);
+    ctx.shadowBlur = 0;
 
-const HR_ZONES = [
-  { key: "int_hr_zone_rest",      pctLow: 50, pctHigh: 60, color: "#60a5fa", track: "bg-blue-500/20",   bar: "bg-blue-500"   },
-  { key: "int_hr_zone_fatburn",   pctLow: 60, pctHigh: 70, color: "#34d399", track: "bg-emerald-500/20",bar: "bg-emerald-500"},
-  { key: "int_hr_zone_aerobic",   pctLow: 70, pctHigh: 80, color: "#fbbf24", track: "bg-yellow-500/20", bar: "bg-yellow-500" },
-  { key: "int_hr_zone_anaerobic", pctLow: 80, pctHigh: 90, color: "#f97316", track: "bg-orange-500/20", bar: "bg-orange-500" },
-  { key: "int_hr_zone_max",       pctLow: 90, pctHigh: 100,color: "#f43f5e", track: "bg-rose-500/20",   bar: "bg-rose-500"   },
-];
+    ctx.restore();
+  }, [canvasRef, endGame]);
 
-function HeartRateZones() {
-  const { t } = useLanguage();
-  const [age, setAge] = useState("");
-  const [maxHR, setMaxHR] = useState<number | null>(null);
+  /* game loop */
+  useEffect(() => {
+    const loop = () => {
+      if (state.current.phase === "playing") draw();
+      rafRef.current = requestAnimationFrame(loop);
+    };
+    rafRef.current = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [draw]);
 
-  const handleCalc = () => {
-    const a = parseInt(age, 10);
-    if (!isNaN(a) && a > 0 && a < 130) setMaxHR(220 - a);
-  };
+  /* keyboard */
+  useEffect(() => {
+    const onDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft"  || e.key === "a") state.current.left  = true;
+      if (e.key === "ArrowRight" || e.key === "d") state.current.right = true;
+      if ((e.key === " " || e.key === "Enter") && state.current.phase !== "playing") startGame();
+    };
+    const onUp = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft"  || e.key === "a") state.current.left  = false;
+      if (e.key === "ArrowRight" || e.key === "d") state.current.right = false;
+    };
+    window.addEventListener("keydown", onDown);
+    window.addEventListener("keyup",   onUp);
+    return () => { window.removeEventListener("keydown", onDown); window.removeEventListener("keyup", onUp); };
+  }, [startGame]);
 
-  return (
-    <ToolCard num="02" titleKey="int_hr_title" descKey="int_hr_desc">
-      <div className="mb-5">
-        <label className="block text-xs text-white/50 mb-1.5 tracking-wide">{t("int_hr_age")}</label>
-        <input
-          type="number"
-          min={5}
-          max={120}
-          value={age}
-          onChange={(e) => { setAge(e.target.value); setMaxHR(null); }}
-          placeholder="25"
-          className="w-full bg-white/[0.06] border border-white/[0.1] rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-red-500/60 transition-colors"
-        />
-      </div>
+  /* touch / mouse drag on canvas */
+  const onPointerMove = useCallback((clientX: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas || state.current.phase !== "playing") return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = W / rect.width;
+    const canvasX = (clientX - rect.left) * scaleX;
+    state.current.playerX = Math.max(0, Math.min(W - PLAYER_W, canvasX - PLAYER_W / 2));
+  }, [canvasRef]);
 
-      <button
-        onClick={handleCalc}
-        disabled={!age}
-        className="w-full bg-red-700 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-white text-sm font-medium py-3 rounded-xl cursor-pointer mb-5"
-      >
-        {t("int_hr_submit")}
-      </button>
-
-      <AnimatePresence>
-        {maxHR && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="flex items-center justify-between mb-5 px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08]">
-              <span className="text-xs text-white/50">{t("int_hr_maxrate")}</span>
-              <span className="text-lg font-bold text-red-400">{maxHR} <span className="text-xs font-normal text-white/40">{t("int_hr_bpm")}</span></span>
-            </div>
-
-            <div className="space-y-3">
-              {HR_ZONES.map((zone, i) => {
-                const lo = Math.round(maxHR * zone.pctLow / 100);
-                const hi = Math.round(maxHR * zone.pctHigh / 100);
-                const barW = zone.pctHigh - zone.pctLow; // width relative to 50-100 range
-                const barOffset = zone.pctLow - 50;
-                return (
-                  <motion.div
-                    key={zone.key}
-                    initial={{ opacity: 0, x: -12 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.06, duration: 0.35 }}
-                    className="flex items-center gap-3"
-                  >
-                    <span className="text-xs font-medium w-20 flex-shrink-0" style={{ color: zone.color }}>
-                      {t(zone.key as any)}
-                    </span>
-                    <div className="flex-1 h-5 rounded-full overflow-hidden bg-white/[0.06] relative">
-                      <div
-                        className={`absolute top-0 h-full rounded-full ${zone.bar}`}
-                        style={{
-                          left: `${barOffset * 2}%`,
-                          width: `${barW * 2}%`,
-                          opacity: 0.85,
-                        }}
-                      />
-                    </div>
-                    <span className="text-xs text-white/50 w-24 text-right flex-shrink-0 font-mono">
-                      {lo}–{hi} {t("int_hr_bpm")}
-                    </span>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </ToolCard>
-  );
-}
-
-/* ─── Myth vs. Fact Flip Cards ───────────────────────────────────── */
-
-const MYTHS = [1, 2, 3, 4, 5, 6] as const;
-
-function FlipCard({ num }: { num: number }) {
-  const { t } = useLanguage();
-  const [flipped, setFlipped] = useState(false);
-
-  return (
-    <div
-      className="h-52 cursor-pointer"
-      style={{ perspective: "1000px" }}
-      onClick={() => setFlipped((v) => !v)}
-    >
-      <motion.div
-        className="relative w-full h-full"
-        style={{ transformStyle: "preserve-3d" }}
-        animate={{ rotateY: flipped ? 180 : 0 }}
-        transition={{ duration: 0.55, ease: [0.4, 0, 0.2, 1] }}
-      >
-        {/* Front — Myth */}
-        <div
-          className="absolute inset-0 rounded-2xl p-5 flex flex-col justify-between border border-white/[0.08]"
-          style={{ backfaceVisibility: "hidden", background: "rgba(255,255,255,0.04)" }}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] tracking-widest uppercase text-red-400/80 font-semibold px-2.5 py-1 rounded-full bg-red-900/30 border border-red-700/30">
-              {t("int_myth_label")}
-            </span>
-            <span className="text-white/20 text-xs">{String(num).padStart(2, "0")}</span>
-          </div>
-          <p className="text-sm text-white/80 leading-relaxed font-medium">{t(`int_myth${num}` as any)}</p>
-          <p className="text-[10px] text-white/25 tracking-wide">{t("int_tap_to_flip")}</p>
-        </div>
-
-        {/* Back — Fact */}
-        <div
-          className="absolute inset-0 rounded-2xl p-5 flex flex-col justify-between border border-emerald-700/30"
-          style={{
-            backfaceVisibility: "hidden",
-            transform: "rotateY(180deg)",
-            background: "rgba(6,78,59,0.25)",
-          }}
-        >
-          <span className="text-[10px] tracking-widest uppercase text-emerald-400/90 font-semibold px-2.5 py-1 rounded-full bg-emerald-900/40 border border-emerald-700/30 w-fit">
-            {t("int_fact_label")}
-          </span>
-          <p className="text-sm text-white/80 leading-relaxed">{t(`int_fact${num}` as any)}</p>
-          <p className="text-[10px] text-emerald-400/40 tracking-wide">{t("int_tap_to_flip")}</p>
-        </div>
-      </motion.div>
-    </div>
-  );
-}
-
-function MythVsFact() {
-  const { t } = useLanguage();
-  return (
-    <ToolCard num="03" titleKey="int_myth_title" descKey="int_myth_desc">
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {MYTHS.map((n) => (
-          <FlipCard key={n} num={n} />
-        ))}
-      </div>
-    </ToolCard>
-  );
-}
-
-/* ─── Shared Tool Card wrapper ───────────────────────────────────── */
-
-function ToolCard({
-  num, titleKey, descKey, children,
-}: {
-  num: string; titleKey: string; descKey: string; children: React.ReactNode;
-}) {
-  const { t } = useLanguage();
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.55 }}
-      className="rounded-3xl p-8 border border-white/[0.08]"
-      style={{ background: "rgba(255,255,255,0.035)" }}
-    >
-      <div className="flex items-start gap-4 mb-6">
-        <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-bold text-red-300"
-          style={{ background: "rgba(185,28,28,0.2)", border: "1px solid rgba(185,28,28,0.3)" }}
-        >
-          {num}
-        </div>
-        <div>
-          <h2
-            className="text-2xl font-bold text-white leading-tight mb-1"
-            style={{ fontFamily: "'Cormorant Garamond', serif" }}
-          >
-            {t(titleKey as any)}
-          </h2>
-          <p className="text-sm text-white/45 leading-relaxed">{t(descKey as any)}</p>
-        </div>
-      </div>
-      {children}
-    </motion.div>
-  );
+  return { display, startGame, onPointerMove };
 }
 
 /* ─── Page ───────────────────────────────────────────────────────── */
 
 export default function Interactables() {
-  const { t } = useLanguage();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { display, startGame, onPointerMove } = useGame(canvasRef);
+
+  /* draw idle / game-over screen via canvas when not playing */
+  useEffect(() => {
+    if (display.phase === "playing") return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.fillStyle = "#0f0c0c";
+    ctx.fillRect(0, 0, W, H);
+
+    /* subtle grid */
+    ctx.strokeStyle = "rgba(255,255,255,0.03)";
+    ctx.lineWidth = 1;
+    for (let x = 80; x < W; x += 80) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+    for (let y = 80; y < H; y += 80) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    if (display.phase === "idle") {
+      ctx.font = "80px serif";
+      ctx.shadowColor = "#f43f5e"; ctx.shadowBlur = 30;
+      ctx.fillText("❤️", W / 2, H / 2 - 80);
+      ctx.shadowBlur = 0;
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 28px 'Outfit', sans-serif";
+      ctx.fillText("Heart Defender", W / 2, H / 2 - 10);
+
+      ctx.fillStyle = "rgba(255,255,255,0.45)";
+      ctx.font = "14px 'Outfit', sans-serif";
+      ctx.fillText("Catch healthy items · Dodge junk food", W / 2, H / 2 + 28);
+
+      ctx.fillStyle = "rgba(255,255,255,0.2)";
+      ctx.font = "12px 'Outfit', sans-serif";
+      ctx.fillText("← → keys or drag to move", W / 2, H / 2 + 56);
+    } else {
+      /* game over */
+      ctx.font = "56px serif";
+      ctx.fillText("💔", W / 2, H / 2 - 100);
+
+      ctx.fillStyle = "#f87171";
+      ctx.font = "bold 30px 'Outfit', sans-serif";
+      ctx.fillText("Game Over", W / 2, H / 2 - 40);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 42px 'Outfit', sans-serif";
+      ctx.fillText(String(display.score), W / 2, H / 2 + 18);
+
+      ctx.fillStyle = "rgba(255,255,255,0.4)";
+      ctx.font = "13px 'Outfit', sans-serif";
+      ctx.fillText(`Best: ${display.hiScore}`, W / 2, H / 2 + 56);
+    }
+  }, [display.phase, display.score, display.hiScore]);
+
+  const hearts = Array.from({ length: 3 }, (_, i) => i < display.lives ? "❤️" : "🖤");
 
   return (
     <div className="min-h-screen font-['Outfit',sans-serif]" style={{ background: "#0f0c0c" }}>
 
       {/* Header */}
-      <div className="pt-20 pb-16 px-10 lg:px-16 relative overflow-hidden">
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse at 50% 110%, rgba(180,20,20,0.2), transparent 65%)" }}
-        />
-        <div className="max-w-5xl mx-auto relative z-10 text-center">
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <p className="text-[11px] tracking-[0.14em] uppercase text-red-400 font-medium mb-4">{t("int_page_badge")}</p>
-            <h1
-              className="text-6xl lg:text-7xl font-bold text-white leading-tight tracking-tight mb-5"
-              style={{ fontFamily: "'Cormorant Garamond', serif" }}
-            >
-              {t("int_page_title")}
-            </h1>
-            <p className="text-base text-white/45 max-w-lg mx-auto leading-relaxed font-light">{t("int_page_sub")}</p>
-          </motion.div>
-        </div>
+      <div className="pt-16 pb-10 px-6 relative overflow-hidden text-center">
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: "radial-gradient(ellipse at 50% 110%, rgba(180,20,20,0.18), transparent 65%)" }} />
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="relative z-10">
+          <p className="text-[11px] tracking-[0.14em] uppercase text-red-400 font-medium mb-3">Explore</p>
+          <h1 className="text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight mb-3"
+            style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+            Interactables
+          </h1>
+          <p className="text-sm text-white/40 max-w-md mx-auto leading-relaxed">
+            Learn heart health through play.
+          </p>
+        </motion.div>
       </div>
 
-      {/* Divider */}
-      <div className="h-px bg-gradient-to-r from-transparent via-red-900/40 to-transparent mx-10 lg:mx-16" />
+      <div className="h-px bg-gradient-to-r from-transparent via-red-900/40 to-transparent mx-8" />
 
-      {/* Tools */}
-      <div className="max-w-5xl mx-auto px-10 lg:px-16 py-16 flex flex-col gap-8">
-        <BloodPressureChecker />
-        <HeartRateZones />
-        <MythVsFact />
+      {/* Game area */}
+      <div className="flex flex-col items-center py-12 px-4 gap-5">
+
+        {/* HUD */}
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="flex items-center justify-between w-full max-w-[480px] px-1"
+        >
+          <div className="flex flex-col">
+            <span className="text-[10px] tracking-widest uppercase text-white/25 mb-0.5">Score</span>
+            <span className="text-2xl font-bold text-white tabular-nums">{display.score}</span>
+          </div>
+          <div className="flex gap-1 text-xl">{hearts}</div>
+          <div className="flex flex-col items-end">
+            <span className="text-[10px] tracking-widest uppercase text-white/25 mb-0.5">Best</span>
+            <span className="text-2xl font-bold text-white/50 tabular-nums">{display.hiScore}</span>
+          </div>
+        </motion.div>
+
+        {/* Canvas */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="relative rounded-3xl overflow-hidden"
+          style={{ boxShadow: "0 0 60px rgba(185,28,28,0.2), 0 0 0 1px rgba(255,255,255,0.06)" }}
+        >
+          <canvas
+            ref={canvasRef}
+            width={W}
+            height={H}
+            className="block touch-none"
+            style={{ width: "min(480px, calc(100vw - 32px))", height: "auto", cursor: "none" }}
+            onMouseMove={(e) => onPointerMove(e.clientX)}
+            onTouchMove={(e) => { e.preventDefault(); onPointerMove(e.touches[0].clientX); }}
+          />
+
+          {/* Overlay buttons */}
+          <AnimatePresence>
+            {display.phase !== "playing" && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="absolute inset-0 flex items-end justify-center pb-12"
+              >
+                <button
+                  onClick={startGame}
+                  className="bg-red-700 hover:bg-red-600 active:scale-95 transition-all text-white font-semibold text-sm px-10 py-3.5 rounded-full cursor-pointer shadow-lg shadow-red-900/40"
+                >
+                  {display.phase === "idle" ? "▶  Play" : "↺  Play Again"}
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+
+        {/* Legend */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="flex gap-6 text-xs text-white/35"
+        >
+          <span>✅ Catch: {GOOD.join(" ")}</span>
+          <span>❌ Dodge: {BAD.join(" ")}</span>
+        </motion.div>
+
+        {/* Controls hint */}
+        <p className="text-[11px] text-white/20 tracking-wide">
+          Mouse / touch to aim &nbsp;·&nbsp; ← → or A / D to move &nbsp;·&nbsp; 3 lives
+        </p>
+
       </div>
 
       {/* Disclaimer */}
-      <div className="mx-10 lg:mx-16 mb-16 rounded-2xl bg-amber-950/30 border border-amber-700/30 px-6 py-4 flex items-start gap-3">
-        <span className="text-base mt-0.5">⚠️</span>
-        <p className="text-xs text-amber-200/60 leading-relaxed">
-          These tools are for educational purposes only and do not constitute medical advice. Always consult a qualified healthcare provider for diagnosis and treatment.
+      <div className="mx-8 mb-12 rounded-2xl bg-amber-950/30 border border-amber-700/25 px-5 py-3.5 flex items-start gap-2.5">
+        <span className="text-sm mt-0.5">⚠️</span>
+        <p className="text-xs text-amber-200/50 leading-relaxed">
+          This game is for educational fun only. Always consult a qualified healthcare provider for medical advice.
         </p>
       </div>
 
