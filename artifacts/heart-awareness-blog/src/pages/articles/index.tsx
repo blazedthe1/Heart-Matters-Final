@@ -9,8 +9,12 @@ export default function ArticlesList() {
   const [activeCategory, setActiveCategory] = useState("All");
   const { t } = useLanguage();
 
+  const loadArticles = () => setAllArticles(getPublishedArticles());
+
   useEffect(() => {
-    setAllArticles(getPublishedArticles());
+    loadArticles();
+    window.addEventListener("storage", loadArticles);
+    return () => window.removeEventListener("storage", loadArticles);
   }, []);
 
   const usedCategories = Array.from(new Set(allArticles.map(a => a.category)));

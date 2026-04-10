@@ -29,6 +29,7 @@ function loadArticles(): Article[] {
 
 function saveArticles(articles: Article[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(articles));
+  window.dispatchEvent(new StorageEvent("storage", { key: STORAGE_KEY }));
 }
 
 export function getAdminPassword(): string {

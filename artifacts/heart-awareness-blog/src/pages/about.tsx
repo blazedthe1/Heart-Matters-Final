@@ -103,15 +103,9 @@ export default function About() {
                   <p className="text-[10px] tracking-widest uppercase text-red-700 font-medium">{t("about_t_grade")}</p>
                 </div>
               </div>
-              <p className="text-[#5a4a4a] leading-[1.85] text-[15px] font-light mb-6">
-                Heart Matters was built from the ground up by Mishal and Alby, two Grade 10 students at Rajagiri Public School in Qatar. What started as a shared curiosity about cardiovascular health quickly grew into something much bigger — a platform designed to make life-saving information accessible, approachable, and genuinely useful for people of all ages.
-              </p>
-              <p className="text-[#5a4a4a] leading-[1.85] text-[15px] font-light mb-6">
-                Every article, every feature, and every line of code on this website represents hours of research, late-night problem-solving, and a deep belief that young people can make a real difference. We wanted to prove that meaningful health education does not have to come from a hospital or a textbook — it can come from students who care enough to build something worth sharing.
-              </p>
-              <p className="text-[#5a4a4a] leading-[1.85] text-[15px] font-light">
-                We poured our hearts (pun intended) into this project, and we sincerely hope it helps you or someone you love learn something new about keeping their heart healthy. If even one person takes a small step toward better cardiovascular health because of this site, then every bit of effort was worth it. Thank you for being here.
-              </p>
+              <p className="text-[#5a4a4a] leading-[1.85] text-[15px] font-light mb-6">{t("about_t_p1")}</p>
+              <p className="text-[#5a4a4a] leading-[1.85] text-[15px] font-light mb-6">{t("about_t_p2")}</p>
+              <p className="text-[#5a4a4a] leading-[1.85] text-[15px] font-light">{t("about_t_p3")}</p>
             </div>
             <div className="border-t border-[#e8d8d4] bg-[#faf8f5] px-10 md:px-14 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
               <p className="text-xs text-[#8a7070] font-light">{t("about_t_built")}</p>

@@ -33,10 +33,14 @@ function CopyEmailButton({ email, copyLabel, copiedLabel }: { email: string; cop
 
 export default function Home() {
   const [latestArticles, setLatestArticles] = useState<Article[]>([]);
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+
+  const loadArticles = () => setLatestArticles(getPublishedArticles().slice(0, 3));
 
   useEffect(() => {
-    setLatestArticles(getPublishedArticles().slice(0, 3));
+    loadArticles();
+    window.addEventListener("storage", loadArticles);
+    return () => window.removeEventListener("storage", loadArticles);
   }, []);
 
   return (
@@ -58,8 +62,18 @@ export default function Home() {
             </div>
 
             <h1
-              className="text-6xl lg:text-7xl font-bold leading-[1.02] tracking-tight text-[#0f0c0c] mb-6"
-              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+              className={`font-bold tracking-tight text-[#0f0c0c] mb-6 leading-[1.15] ${
+                lang === "ml" || lang === "hi"
+                  ? "text-4xl lg:text-5xl"
+                  : lang === "ar"
+                  ? "text-5xl lg:text-6xl leading-[1.25]"
+                  : "text-6xl lg:text-7xl leading-[1.02]"
+              }`}
+              style={{
+                fontFamily: lang === "en" || lang === "es" || lang === "fr"
+                  ? "'Cormorant Garamond', serif"
+                  : "'Outfit', sans-serif",
+              }}
             >
               {t("hero_title1")}{" "}
               <em className="text-red-700 not-italic">{t("hero_title2")}</em>
