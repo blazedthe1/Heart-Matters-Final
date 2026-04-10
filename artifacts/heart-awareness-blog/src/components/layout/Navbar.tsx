@@ -17,6 +17,7 @@ export function Navbar() {
     { href: "/", key: "nav_home" },
     { href: "/articles", key: "nav_articles" },
     { href: "/risk-assessment", key: "nav_risk" },
+    { href: "/interactables", label: "Interactables" },
     { href: "/resources", key: "nav_resources" },
     { href: "/about", key: "nav_about" },
   ];
@@ -75,7 +76,7 @@ export function Navbar() {
                     : "text-white/60 hover:text-white"
                 }`}
               >
-                {t(link.key)}
+                {"label" in link ? link.label : t(link.key!)}
                 {location === link.href && (
                   <motion.span
                     layoutId="nav-indicator"
@@ -173,7 +174,7 @@ export function Navbar() {
                   }`}
                   onClick={() => setMenuOpen(false)}
                 >
-                  {t(link.key)}
+                  {"label" in link ? link.label : t(link.key!)}
                 </Link>
               ))}
               {/* Language options in mobile menu */}
