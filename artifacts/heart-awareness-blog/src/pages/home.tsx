@@ -95,6 +95,19 @@ export default function Home() {
           <div className="absolute inset-0 pointer-events-none"
             style={{ background: "radial-gradient(ellipse at 60% 30%, rgba(192,57,43,0.18), transparent 65%)" }} />
           <ECGMonitor />
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+            className="relative z-10 mt-6"
+          >
+            <a href="#interactables">
+              <button className="flex items-center gap-2 bg-red-700 hover:bg-red-600 transition-colors text-white text-sm font-medium px-7 py-3 rounded-full cursor-pointer shadow-lg shadow-red-900/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                Check out our Interactables!
+              </button>
+            </a>
+          </motion.div>
         </motion.div>
       </section>
 
@@ -134,6 +147,43 @@ export default function Home() {
         </div>
         <div className="h-px bg-gradient-to-r from-transparent via-red-900/40 to-transparent" />
       </div>
+
+      {/* ─── INTERACTABLES ────────────────────────────────────── */}
+      <section id="interactables" className="py-24 px-10 lg:px-16 bg-[#faf8f5] w-full">
+        <div className="max-w-6xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <p className="text-[11px] tracking-[0.14em] uppercase text-red-700 font-medium mb-3">Explore</p>
+            <h2
+              className="text-5xl font-bold text-[#0f0c0c] leading-tight tracking-tight mb-4"
+              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            >
+              Interactables
+            </h2>
+            <p className="text-sm text-[#8a7070] leading-relaxed max-w-md mx-auto mb-16">
+              Hands-on tools and simulations to help you explore cardiovascular health concepts.
+            </p>
+
+            {/* Empty state */}
+            <div className="border-2 border-dashed border-[#e8d8d4] rounded-2xl py-20 px-10 flex flex-col items-center gap-4">
+              <div
+                className="w-14 h-14 rounded-full flex items-center justify-center mb-2"
+                style={{ background: "rgba(185,28,28,0.08)", border: "1px solid rgba(185,28,28,0.15)" }}
+              >
+                <span className="text-2xl">🫀</span>
+              </div>
+              <p className="text-base font-semibold text-[#0f0c0c]">No interactables yet</p>
+              <p className="text-sm text-[#8a7070] max-w-xs leading-relaxed">
+                We're working on exciting interactive tools. Check back soon!
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
       {/* ─── FEATURES ─────────────────────────────────────────── */}
       <section className="py-24 px-10 lg:px-16 max-w-6xl mx-auto w-full">
