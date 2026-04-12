@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Pause, Play } from "lucide-react";
+import { HeartExplorerModal } from "@/components/HeartExplorer";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 /* ─── Constants ──────────────────────────────────────────────────── */
 
@@ -544,6 +546,8 @@ function GameModal({ onClose }: { onClose: () => void }) {
 
 export default function Interactables() {
   const [gameOpen, setGameOpen] = useState(false);
+  const [explorerOpen, setExplorerOpen] = useState(false);
+  const { t } = useLanguage();
 
   return (
     <div className="min-h-screen font-['Outfit',sans-serif]" style={{ background: "#0f0c0c" }}>
@@ -554,14 +558,14 @@ export default function Interactables() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="relative z-10">
           <p className="text-[11px] tracking-[0.14em] uppercase text-red-400 font-medium mb-3">Explore</p>
           <h1 className="text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight mb-3"
-            style={{ fontFamily: "'Cormorant Garamond', serif" }}>Interactables</h1>
+            style={{ fontFamily: "'Cormorant Garamond', serif" }}>{t("int_page_title")}</h1>
           <p className="text-sm text-white/40 max-w-md mx-auto leading-relaxed">Learn heart health through play.</p>
         </motion.div>
       </div>
 
       <div className="h-px bg-gradient-to-r from-transparent via-red-900/40 to-transparent mx-8" />
 
-      <div className="flex flex-col items-center py-16 px-6">
+      <div className="flex flex-col items-center gap-4 py-16 px-6">
         <motion.button
           initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.15 }}
           onClick={() => setGameOpen(true)}
@@ -582,6 +586,30 @@ export default function Interactables() {
             ▶ Play
           </div>
         </motion.button>
+
+        <motion.button
+          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.25 }}
+          onClick={() => setExplorerOpen(true)}
+          className="group flex items-center gap-5 rounded-2xl px-7 py-5 cursor-pointer transition-all w-full max-w-sm"
+          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.06)")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.03)")}
+        >
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+            style={{ background: "rgba(28,60,185,0.2)", border: "1px solid rgba(28,60,185,0.3)" }}>
+            <span className="text-2xl">🫀</span>
+          </div>
+          <div className="text-left flex-1">
+            <p className="text-sm font-semibold text-white mb-0.5">{t("int_explorer_name")}</p>
+            <p className="text-xs text-white/35">{t("int_explorer_desc")}</p>
+          </div>
+          <div className="px-3 py-1.5 rounded-full text-white text-xs font-semibold transition-colors flex-shrink-0"
+            style={{ background: "rgba(79,70,229,0.8)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(99,102,241,0.9)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(79,70,229,0.8)")}>
+            {t("int_explorer_cta")}
+          </div>
+        </motion.button>
       </div>
 
       <div className="mx-8 mb-12 rounded-2xl bg-amber-950/30 border border-amber-700/25 px-5 py-3.5 flex items-start gap-2.5">
@@ -593,6 +621,9 @@ export default function Interactables() {
 
       <AnimatePresence>
         {gameOpen && <GameModal onClose={() => setGameOpen(false)} />}
+      </AnimatePresence>
+      <AnimatePresence>
+        {explorerOpen && <HeartExplorerModal onClose={() => setExplorerOpen(false)} />}
       </AnimatePresence>
     </div>
   );
