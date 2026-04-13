@@ -338,7 +338,7 @@ export const T: Record<string, Record<LangCode, string>> = {
   /* ── Heart Explorer interactable ────────────────────────────────── */
   int_explorer_name: { en:"Heart Explorer", es:"Explorador del Corazón", hi:"हृदय एक्सप्लोरर", ml:"ഹൃദ്‌ അന്വേഷകൻ", fr:"Explorateur du Cœur", ar:"مستكشف القلب" },
   int_explorer_desc: { en:"Click regions to learn anatomy", es:"Clic para explorar la anatomía", hi:"क्षेत्र क्लिक करके शरीर रचना जानें", ml:"ഭാഗങ്ങൾ ക്ലിക്ക് ചെയ്ത് ഘടന മനസ്സിലാക്കൂ", fr:"Cliquez pour explorer l'anatomie", ar:"انقر لاستكشاف تشريح القلب" },
-  int_explorer_cta:  { en:"🫀 Explore", es:"🫀 Explorar", hi:"🫀 जानें", ml:"🫀 ജ്ഞാനം", fr:"🫀 Explorer", ar:"🫀 استكشف" },
+  int_explorer_cta:  { en:"🔍 Explore", es:"🔍 Explorar", hi:"🔍 जानें", ml:"🔍 ജ്ഞാനം", fr:"🔍 Explorer", ar:"🔍 استكشف" },
 
   /* ── Footer ─────────────────────────────────────────────────────── */
   footer_initiative:{ en:"A Student-Led Initiative",   es:"Una Iniciativa Estudiantil",  hi:"एक छात्र-नेतृत्व पहल",    ml:"ഒരു വിദ്യാർഥി-നേതൃത്വ മുൻകൈ",  fr:"Une Initiative Étudiante",   ar:"مبادرة طلابية" },

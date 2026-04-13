@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Activity, Info, Droplet } from "lucide-react";
+import { X, Activity, Info, Droplet, Heart, ChevronRight } from "lucide-react";
 import { HeartPartId, HeartPart, heartParts } from "@/data/heart-parts";
 
 const heartImgSrc = `${import.meta.env.BASE_URL}heart-hd.png`;
 
-const HEART_VIEWBOX = "590 10 690 1060";
-const CONTAINER_RATIO = "690 / 1060";
+// Image is 1456×816. Heart occupies the center of the frame.
+// ViewBox crops to the heart region with a little padding.
+const HEART_VIEWBOX = "330 0 770 816";
+const CONTAINER_RATIO = "770 / 816";
 
 const RENDER_ORDER: HeartPartId[] = [
   "right-ventricle", "left-ventricle",
@@ -17,83 +19,30 @@ const RENDER_ORDER: HeartPartId[] = [
   "mitral-valve", "pulmonary-valve", "aortic-valve",
 ];
 
+const TYPE_META: Record<string, { icon: React.ReactNode; color: string; bg: string; border: string }> = {
+  Chamber:   { icon: <Heart className="w-3 h-3" />,     color: "#f87171", bg: "rgba(239,68,68,0.1)",   border: "rgba(239,68,68,0.25)" },
+  Valve:     { icon: <Activity className="w-3 h-3" />,  color: "#fb923c", bg: "rgba(251,146,60,0.1)",  border: "rgba(251,146,60,0.25)" },
+  Vessel:    { icon: <Droplet className="w-3 h-3" />,   color: "#60a5fa", bg: "rgba(96,165,250,0.1)",  border: "rgba(96,165,250,0.25)" },
+  Structure: { icon: <Info className="w-3 h-3" />,      color: "#a78bfa", bg: "rgba(167,139,250,0.1)", border: "rgba(167,139,250,0.25)" },
+};
+
+// All paths remapped from original 1920×1080 SVG space → 1456×816 image space
+// Scale factors: x * (1456/1920) = x * 0.7583, y * (816/1080) = y * 0.7556
 const regionPaths: Partial<Record<HeartPartId, string>> = {
-  "right-atrium": [
-    "M 698 72", "C 658 105 632 185 622 295",
-    "C 618 375 618 445 620 508", "L 908 510",
-    "C 905 445 898 375 885 298", "C 870 215 845 152 808 108",
-    "C 778 75 742 62 710 64", "Z",
-  ].join(" "),
-  "left-atrium": [
-    "M 920 68", "C 968 78 1048 112 1128 185",
-    "C 1188 240 1228 315 1245 400", "L 1248 510",
-    "L 912 510", "C 908 445 900 375 892 298",
-    "C 882 220 864 155 842 110", "C 900 80 920 68 920 68", "Z",
-  ].join(" "),
-  "right-ventricle": [
-    "M 620 510", "C 618 590 618 685 622 780",
-    "C 630 870 652 948 692 996", "C 728 1028 778 1042 840 1040",
-    "C 875 1038 905 1036 930 1036", "C 928 950 922 855 918 760",
-    "C 915 668 912 582 910 510", "L 620 510", "Z",
-  ].join(" "),
-  "left-ventricle": [
-    "M 912 510", "L 1248 510",
-    "C 1248 598 1246 698 1238 795", "C 1225 880 1195 955 1145 1002",
-    "C 1098 1038 1040 1050 978 1048", "C 955 1042 940 1038 930 1036",
-    "C 926 950 920 858 918 762", "C 915 668 912 582 912 510", "Z",
-  ].join(" "),
-  septum: [
-    "M 908 505", "C 912 495 926 495 930 505",
-    "L 935 1036", "C 930 1042 925 1040 920 1036",
-    "L 908 505", "Z",
-  ].join(" "),
-  "tricuspid-valve": [
-    "M 628 505", "C 680 482 772 476 858 488",
-    "C 892 494 908 504 908 514", "C 858 524 768 528 682 516",
-    "C 650 510 630 508 628 505", "Z",
-  ].join(" "),
-  "mitral-valve": [
-    "M 912 505", "C 968 482 1075 476 1175 490",
-    "C 1215 498 1240 508 1240 518", "C 1188 530 1078 534 972 522",
-    "C 930 514 912 510 912 505", "Z",
-  ].join(" "),
-  "pulmonary-valve": [
-    "M 700 392", "C 725 370 760 362 800 375",
-    "C 828 385 842 402 838 418", "C 810 432 768 432 735 418",
-    "C 712 408 700 398 700 392", "Z",
-  ].join(" "),
-  "aortic-valve": [
-    "M 845 368", "C 868 348 906 342 942 358",
-    "C 965 370 972 388 962 402", "C 935 418 895 415 868 400",
-    "C 850 390 845 378 845 368", "Z",
-  ].join(" "),
-  aorta: [
-    "M 842 24", "L 948 24",
-    "C 950 80 950 155 948 240", "C 946 295 942 340 938 372",
-    "L 845 372", "C 842 340 840 295 840 240",
-    "C 838 155 838 80 842 24", "Z",
-  ].join(" "),
-  "pulmonary-artery": [
-    "M 700 105", "C 710 75 738 52 775 48",
-    "C 812 44 848 60 868 88", "C 882 108 885 135 878 158",
-    "L 848 162", "C 852 145 848 125 838 110",
-    "C 818 88 788 78 758 82", "C 732 86 715 105 710 132",
-    "L 692 128", "C 694 118 698 110 700 105", "Z",
-  ].join(" "),
-  "superior-vena-cava": [
-    "M 1002 24", "C 1004 18 1058 18 1060 24",
-    "L 1062 248", "C 1062 258 1000 258 1000 248",
-    "L 1002 24", "Z",
-  ].join(" "),
-  "inferior-vena-cava": [
-    "M 818 942", "C 820 935 862 935 864 942",
-    "L 866 1042", "C 866 1050 818 1050 818 1042",
-    "L 818 942", "Z",
-  ].join(" "),
-  "pulmonary-veins": [
-    "M 1220 322", "L 1282 318", "L 1284 355", "L 1222 360",
-    "L 1222 390", "L 1282 386", "L 1282 422", "L 1220 426", "Z",
-  ].join(" "),
+  "right-atrium":      "M 529 54 C 499 79 479 140 472 223 C 469 283 469 336 470 384 L 689 385 C 686 336 681 283 671 225 C 660 162 641 115 613 82 C 590 57 563 47 538 48 Z",
+  "left-atrium":       "M 698 51 C 734 59 795 85 855 140 C 901 181 931 238 944 302 L 946 385 L 692 385 C 689 336 682 283 676 225 C 669 166 655 117 639 83 C 682 60 698 51 698 51 Z",
+  "right-ventricle":   "M 470 385 C 469 446 469 518 472 589 C 478 657 494 716 525 753 C 552 777 590 787 637 786 C 664 784 686 783 705 783 C 704 718 699 646 696 574 C 694 505 692 440 690 385 L 470 385 Z",
+  "left-ventricle":    "M 692 385 L 946 385 C 946 452 945 527 939 601 C 929 665 906 722 868 757 C 833 784 789 793 742 792 C 724 787 713 784 705 783 C 702 718 698 648 696 576 C 694 505 692 440 692 385 Z",
+  "septum":            "M 689 382 C 692 374 702 374 705 382 L 709 783 C 705 787 701 786 698 783 L 689 382 Z",
+  "tricuspid-valve":   "M 476 382 C 516 364 585 360 651 369 C 676 373 689 381 689 388 C 651 396 582 399 517 390 C 493 385 478 384 476 382 Z",
+  "mitral-valve":      "M 692 382 C 734 364 815 360 891 370 C 921 376 940 384 940 391 C 901 400 817 403 737 394 C 705 388 692 385 692 382 Z",
+  "pulmonary-valve":   "M 531 296 C 550 280 576 274 607 283 C 628 291 639 304 635 316 C 614 326 582 326 557 316 C 540 308 531 301 531 296 Z",
+  "aortic-valve":      "M 641 278 C 658 263 687 258 714 270 C 732 280 737 293 730 304 C 709 316 679 314 658 302 C 645 295 641 286 641 278 Z",
+  "aorta":             "M 639 18 L 719 18 C 720 60 720 117 719 181 C 717 223 714 257 711 281 L 641 281 C 639 257 637 223 637 181 C 635 117 635 60 639 18 Z",
+  "pulmonary-artery":  "M 531 79 C 538 57 560 39 588 36 C 616 33 643 45 658 66 C 669 82 671 102 666 119 L 643 122 C 646 110 643 94 635 83 C 620 66 598 59 575 62 C 555 65 542 79 538 100 L 525 97 C 526 89 529 83 531 79 Z",
+  "superior-vena-cava":"M 760 18 C 761 14 802 14 804 18 L 805 187 C 805 195 758 195 758 187 L 760 18 Z",
+  "inferior-vena-cava":"M 620 712 C 622 706 654 706 655 712 L 657 787 C 657 793 620 793 620 787 L 620 712 Z",
+  "pulmonary-veins":   "M 925 243 L 972 240 L 974 268 L 927 272 L 927 295 L 972 292 L 972 319 L 925 322 Z",
 };
 
 function hexToRgba(hex: string, alpha: number) {
@@ -103,46 +52,72 @@ function hexToRgba(hex: string, alpha: number) {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-function HeartSVG({
-  hoveredPart, selectedPart, onHover, onClick,
-}: {
+/* ── Heart SVG ── */
+function HeartSVG({ hoveredPart, selectedPart, onHover, onClick, showOutlines }: {
   hoveredPart: HeartPartId | null;
   selectedPart: HeartPartId | null;
+  showOutlines: boolean;
   onHover: (id: HeartPartId | null) => void;
   onClick: (id: HeartPartId | null) => void;
 }) {
   return (
     <div
-      className="select-none"
+      className="select-none relative"
       style={{
         width: "100%",
-        maxWidth: "min(80vh, 360px)",
+        maxWidth: "min(75vh, 380px)",
         aspectRatio: CONTAINER_RATIO,
         margin: "0 auto",
-        filter: "drop-shadow(0 0 55px rgba(180,20,20,0.30)) drop-shadow(0 16px 48px rgba(0,0,0,0.90))",
       }}
       onClick={() => onClick(null)}
     >
-      <svg viewBox={HEART_VIEWBOX} className="w-full h-full" style={{ display: "block", overflow: "visible" }}>
-        <image href={heartImgSrc} x="0" y="0" width="1920" height="1080" preserveAspectRatio="none" />
-        <defs>
+      {/* Outline layer */}
+      {showOutlines && (
+        <svg
+          viewBox={HEART_VIEWBOX}
+          className="w-full h-full"
+          style={{ display: "block", position: "absolute", inset: 0, pointerEvents: "none" }}
+        >
           {RENDER_ORDER.map((id) => {
+            const p = regionPaths[id];
+            if (!p) return null;
             const part = heartParts[id];
+            const isActive = hoveredPart === id || selectedPart === id;
+            if (isActive) return null;
+            const outlineColor = TYPE_META[part.type]?.color ?? "#ffffff";
             return (
-              <filter key={`f-${id}`} id={`he-glow-${id}`} x="-40%" y="-40%" width="180%" height="180%">
-                <feFlood floodColor={part.hoverColor} floodOpacity="0.9" result="color" />
-                <feComposite in="color" in2="SourceGraphic" operator="in" result="tinted" />
-                <feGaussianBlur in="tinted" stdDeviation="18" result="outerGlow" />
-                <feGaussianBlur in="tinted" stdDeviation="6" result="innerGlow" />
-                <feMerge>
-                  <feMergeNode in="outerGlow" />
-                  <feMergeNode in="innerGlow" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
+              <path
+                key={`outline-${id}`}
+                d={p}
+                fill={hexToRgba(part.hoverColor, 0.03)}
+                stroke={outlineColor}
+                strokeWidth={3}
+                strokeLinejoin="round"
+                strokeDasharray="8 5"
+                opacity={0.2}
+                style={{ transition: "opacity 0.2s ease" }}
+              />
             );
           })}
-        </defs>
+        </svg>
+      )}
+
+      {/* Main SVG */}
+      <svg
+        viewBox={HEART_VIEWBOX}
+        className="w-full h-full"
+        style={{ display: "block" }}
+      >
+        {/* Render image at full 1456×816 — viewBox handles the crop */}
+        <image
+          href={heartImgSrc}
+          x="0"
+          y="0"
+          width="1456"
+          height="816"
+          preserveAspectRatio="xMidYMid meet"
+        />
+
         {RENDER_ORDER.map((id) => {
           const path = regionPaths[id];
           if (!path) return null;
@@ -159,9 +134,8 @@ function HeartSVG({
               stroke={isActive ? part.hoverColor : "transparent"}
               strokeWidth={isActive ? 2.5 : 0}
               strokeLinejoin="round"
-              filter={isActive ? `url(#he-glow-${id})` : undefined}
-              opacity={isDeemphasized ? 0 : 1}
-              style={{ cursor: "pointer", transition: "fill 0.15s ease, stroke 0.15s ease, opacity 0.2s ease" }}
+              opacity={isDeemphasized ? 0.08 : 1}
+              style={{ cursor: "pointer", transition: "fill 0.15s ease, stroke 0.15s ease, opacity 0.25s ease" }}
               onMouseEnter={() => onHover(id)}
               onMouseLeave={() => onHover(null)}
               onClick={(e) => { e.stopPropagation(); onClick(selectedPart === id ? null : id); }}
@@ -173,56 +147,92 @@ function HeartSVG({
   );
 }
 
+/* ── Part Detail Panel ── */
 function PartDetail({ part, onClose }: { part: HeartPart; onClose: () => void }) {
+  const meta = TYPE_META[part.type] ?? TYPE_META.Structure;
+
   return (
     <motion.div
       key={part.id}
-      initial={{ opacity: 0, x: 24 }}
+      initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 24 }}
-      transition={{ type: "spring", damping: 28, stiffness: 220 }}
+      exit={{ opacity: 0, x: 20 }}
+      transition={{ type: "spring", damping: 30, stiffness: 260 }}
       className="flex flex-col h-full"
     >
-      <div className="h-1 w-full rounded-t-xl flex-shrink-0" style={{ backgroundColor: part.color }} />
-      <div className="flex items-start justify-between px-5 pt-4 pb-3 border-b border-white/[0.07] flex-shrink-0">
-        <div>
-          <span className="text-[9px] font-bold tracking-widest uppercase text-white/30 flex items-center gap-1.5 mb-1">
-            {part.type === "Chamber" && <Activity className="w-3 h-3" />}
-            {(part.type === "Valve" || part.type === "Vessel") && <Droplet className="w-3 h-3" />}
-            {part.type === "Structure" && <Info className="w-3 h-3" />}
-            {part.type}
-          </span>
-          <h3 className="text-xl font-bold text-white tracking-tight" style={{ textShadow: `0 0 20px ${part.color}66` }}>
-            {part.name}
-          </h3>
+      {/* Color bar */}
+      <div className="h-0.5 w-full flex-shrink-0" style={{
+        background: `linear-gradient(to right, ${part.hoverColor}, ${part.color}44, transparent)`
+      }} />
+
+      {/* Header */}
+      <div className="px-5 pt-5 pb-4 flex-shrink-0">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md mb-2.5"
+              style={{ background: meta.bg, border: `1px solid ${meta.border}` }}>
+              <span style={{ color: meta.color }}>{meta.icon}</span>
+              <span className="text-[9px] font-bold tracking-widest uppercase" style={{ color: meta.color }}>
+                {part.type}
+              </span>
+            </div>
+            <h3 className="text-2xl font-bold text-white leading-tight"
+              style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                textShadow: `0 0 30px ${part.hoverColor}55`
+              }}>
+              {part.name}
+            </h3>
+          </div>
+          <button onClick={onClose}
+            className="w-7 h-7 flex items-center justify-center rounded-lg transition-all cursor-pointer flex-shrink-0 mt-1"
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
+            onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.12)")}
+            onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.06)")}>
+            <X className="w-3.5 h-3.5 text-white/50" />
+          </button>
         </div>
-        <button
-          onClick={onClose}
-          className="w-7 h-7 flex items-center justify-center rounded-full bg-white/[0.07] hover:bg-white/[0.14] transition-colors text-white/50 hover:text-white/80 cursor-pointer flex-shrink-0 mt-0.5"
-        >
-          <X className="w-3.5 h-3.5" />
-        </button>
+
+        <p className="text-sm leading-relaxed mt-3" style={{ color: "rgba(255,255,255,0.65)" }}>
+          {part.shortDescription}
+        </p>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-5 min-h-0">
+      <div className="mx-5 h-px flex-shrink-0" style={{ background: "rgba(255,255,255,0.05)" }} />
+
+      <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-5 min-h-0"
+        style={{ scrollbarWidth: "none" }}>
         <div>
-          <p className="text-sm text-white/75 font-medium leading-relaxed mb-2">{part.shortDescription}</p>
           {part.longDescription.split("\n\n").map((para, i) => (
-            <p key={i} className="text-xs text-white/45 leading-relaxed mb-2">{para}</p>
+            <p key={i} className="text-xs leading-relaxed mb-2" style={{ color: "rgba(255,255,255,0.38)" }}>
+              {para}
+            </p>
           ))}
         </div>
 
-        <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] p-4">
-          <h4 className="text-[9px] font-bold tracking-widest uppercase text-white/30 flex items-center gap-1.5 mb-3">
-            <Activity className="w-3 h-3" />
-            Fast Facts
-          </h4>
-          <ul className="flex flex-col gap-2">
+        <div className="rounded-xl overflow-hidden"
+          style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="px-4 pt-3 pb-2 flex items-center gap-2"
+            style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+            <Activity className="w-3 h-3" style={{ color: part.hoverColor }} />
+            <span className="text-[9px] font-bold tracking-widest uppercase"
+              style={{ color: "rgba(255,255,255,0.3)" }}>Fast Facts</span>
+          </div>
+          <ul className="px-4 py-3 flex flex-col gap-3">
             {part.fastFacts.map((fact, i) => (
-              <li key={i} className="flex items-start gap-2.5">
-                <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: part.hoverColor }} />
-                <span className="text-xs text-white/55 leading-relaxed">{fact}</span>
-              </li>
+              <motion.li
+                key={i}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.05 + 0.1 }}
+                className="flex items-start gap-3"
+              >
+                <div className="flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center mt-0.5"
+                  style={{ background: hexToRgba(part.hoverColor, 0.15), border: `1px solid ${hexToRgba(part.hoverColor, 0.3)}` }}>
+                  <span className="text-[8px] font-bold" style={{ color: part.hoverColor }}>{i + 1}</span>
+                </div>
+                <span className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>{fact}</span>
+              </motion.li>
             ))}
           </ul>
         </div>
@@ -231,12 +241,54 @@ function PartDetail({ part, onClose }: { part: HeartPart; onClose: () => void })
   );
 }
 
+/* ── Idle Panel ── */
+function IdlePanel() {
+  return (
+    <motion.div
+      key="idle"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="flex-1 flex flex-col items-center justify-center gap-4 px-6 py-10 text-center"
+    >
+      <div className="relative">
+        <motion.div
+          animate={{ scale: [1, 1.15, 1], opacity: [0.15, 0.3, 0.15] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute inset-0 rounded-full"
+          style={{ background: "rgba(239,68,68,0.3)" }}
+        />
+        <div className="relative w-14 h-14 rounded-2xl flex items-center justify-center text-2xl"
+          style={{ background: "rgba(185,28,28,0.15)", border: "1px solid rgba(185,28,28,0.25)" }}>
+          🫀
+        </div>
+      </div>
+
+      <div>
+        <p className="text-sm font-semibold text-white/60 mb-1">Select a region</p>
+        <p className="text-xs leading-relaxed max-w-[200px]" style={{ color: "rgba(255,255,255,0.25)" }}>
+          Click any highlighted area on the heart to explore its anatomy and function.
+        </p>
+      </div>
+
+      <div className="flex items-center gap-2 mt-2">
+        <div className="h-px w-8" style={{ background: "rgba(255,255,255,0.08)" }} />
+        <span className="text-[10px] tabular-nums" style={{ color: "rgba(255,255,255,0.2)" }}>
+          {RENDER_ORDER.length} regions to explore
+        </span>
+        <div className="h-px w-8" style={{ background: "rgba(255,255,255,0.08)" }} />
+      </div>
+    </motion.div>
+  );
+}
+
+/* ── Main Modal ── */
 export function HeartExplorerModal({ onClose }: { onClose: () => void }) {
   const [hoveredPart, setHoveredPart] = useState<HeartPartId | null>(null);
   const [selectedPart, setSelectedPart] = useState<HeartPartId | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
-  const activePart = hoveredPart ?? selectedPart;
+  const filterType = null;
+  const showOutlines = true;
 
   return (
     <motion.div
@@ -244,125 +296,130 @@ export function HeartExplorerModal({ onClose }: { onClose: () => void }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.92)", backdropFilter: "blur(16px)" }}
+      style={{ background: "rgba(0,0,0,0.94)" }}
       onClick={onClose}
       onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
     >
       <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
-        className="relative w-full max-w-4xl rounded-2xl overflow-hidden flex flex-col md:flex-row"
+        initial={{ scale: 0.93, opacity: 0, y: 12 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.93, opacity: 0, y: 12 }}
+        transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+        className="relative w-full max-w-4xl rounded-2xl flex flex-col md:flex-row"
         style={{
-          background: "#0d0a0a",
+          background: "#0b0808",
           border: "1px solid rgba(255,255,255,0.07)",
-          boxShadow: "0 0 80px rgba(185,28,28,0.2)",
-          maxHeight: "calc(100vh - 32px)",
+          maxHeight: "min(680px, calc(100vh - 32px))",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-white/[0.07] hover:bg-white/[0.14] transition-colors text-white/50 hover:text-white cursor-pointer md:hidden"
-        >
-          <X className="w-4 h-4" />
-        </button>
 
-        <div className="flex flex-col md:w-[55%] flex-shrink-0">
-          <div className="px-6 pt-5 pb-2 flex items-center justify-between">
+        {/* ── Left panel: Heart visualization ── */}
+        <div className="flex flex-col md:w-[58%] flex-shrink-0">
+
+          {/* Header */}
+          <div className="px-6 pt-5 pb-4 flex items-start justify-between flex-shrink-0"
+            style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
             <div>
-              <h2 className="text-2xl font-bold text-white tracking-tight" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                <span className="text-[9px] tracking-[0.2em] uppercase font-bold"
+                  style={{ color: "rgba(255,255,255,0.3)" }}>Cardiac Anatomy</span>
+              </div>
+              <h2 className="text-2xl font-bold text-white leading-tight"
+                style={{ fontFamily: "'Cormorant Garamond', serif", letterSpacing: "-0.01em" }}>
                 Heart Explorer
               </h2>
-              <p className="text-[10px] tracking-widest uppercase text-white/30 mt-0.5">
-                {selectedPart ? "Click elsewhere to deselect" : "Hover · Click to explore"}
-              </p>
             </div>
-            <button
-              onClick={onClose}
-              className="hidden md:flex w-8 h-8 items-center justify-center rounded-full bg-white/[0.07] hover:bg-white/[0.14] transition-colors text-white/50 hover:text-white cursor-pointer"
-            >
-              <X className="w-4 h-4" />
+            <button onClick={onClose}
+              className="hidden md:flex w-8 h-8 items-center justify-center rounded-xl transition-all cursor-pointer"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
+              onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.1)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}>
+              <X className="w-4 h-4 text-white/50" />
+            </button>
+            <button onClick={onClose}
+              className="md:hidden flex w-8 h-8 items-center justify-center rounded-xl transition-all cursor-pointer"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <X className="w-4 h-4 text-white/50" />
             </button>
           </div>
 
-          <div className="flex-1 flex items-center justify-center px-4 pb-4 min-h-0">
+          {/* Heart */}
+          <div className="flex-1 flex items-center justify-center px-2 py-2">
             <HeartSVG
               hoveredPart={hoveredPart}
               selectedPart={selectedPart}
+              showOutlines={showOutlines}
               onHover={setHoveredPart}
               onClick={setSelectedPart}
             />
           </div>
 
-          <div className="px-6 pb-4 flex flex-wrap gap-x-4 gap-y-1">
-            {(["Chamber", "Valve", "Vessel", "Structure"] as const).map((type) => {
-              const ex = RENDER_ORDER.find((id) => heartParts[id].type === type);
-              const color = ex ? heartParts[ex].hoverColor : "#fff";
-              return (
-                <div key={type} className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-                  <span className="text-[10px] text-white/30 uppercase tracking-widest">{type}</span>
-                </div>
-              );
-            })}
-          </div>
         </div>
 
+        {/* ── Right panel: Detail ── */}
         <div
-          className="md:w-[45%] border-t md:border-t-0 md:border-l border-white/[0.06] flex flex-col"
-          style={{ minHeight: "280px", maxHeight: "calc(100vh - 80px)" }}
+          className="md:w-[42%] flex flex-col"
+          style={{
+            borderTop: "1px solid rgba(255,255,255,0.05)",
+            borderLeft: "1px solid rgba(255,255,255,0.05)",
+            minHeight: "280px",
+            maxHeight: "calc(100vh - 80px)",
+            background: "rgba(255,255,255,0.015)",
+          }}
         >
           <AnimatePresence mode="wait">
-            {selectedPart ? (
-              <PartDetail key={selectedPart} part={heartParts[selectedPart]} onClose={() => setSelectedPart(null)} />
-            ) : (
-              <motion.div
-                key="placeholder"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex-1 flex flex-col items-center justify-center gap-3 px-6 py-8 text-center"
-              >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center"
-                  style={{ background: "rgba(185,28,28,0.15)", border: "1px solid rgba(185,28,28,0.3)" }}>
-                  <span className="text-2xl">🫀</span>
-                </div>
-                <p className="text-sm text-white/30 leading-relaxed max-w-[220px]">
-                  Click any region on the heart to learn what it does.
-                </p>
-              </motion.div>
-            )}
+            {selectedPart
+              ? <PartDetail key={selectedPart} part={heartParts[selectedPart]} onClose={() => setSelectedPart(null)} />
+              : <IdlePanel key="idle" />
+            }
           </AnimatePresence>
         </div>
       </motion.div>
 
+      {/* ── Hover tooltip ── */}
       <AnimatePresence>
         {hoveredPart && !selectedPart && (
           <motion.div
             key={hoveredPart}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.12 }}
-            className="fixed pointer-events-none z-[60] rounded-xl border border-white/[0.1] px-4 py-3 max-w-[220px]"
+            initial={{ opacity: 0, scale: 0.92, y: 4 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.92, y: 4 }}
+            transition={{ duration: 0.1 }}
+            className="fixed pointer-events-none z-[60] rounded-xl max-w-[230px] overflow-hidden"
             style={{
-              left: mousePos.x + 16,
-              top: mousePos.y + 16,
-              background: "rgba(13,10,10,0.95)",
-              backdropFilter: "blur(12px)",
-              boxShadow: `0 0 20px ${heartParts[hoveredPart].hoverColor}33`,
+              left: mousePos.x + 14,
+              top: mousePos.y + 14,
+              background: "rgba(10,8,8,0.97)",
+              border: `1px solid rgba(255,255,255,0.08)`,
+              borderLeft: `3px solid ${heartParts[hoveredPart].hoverColor}`,
             }}
           >
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-sm font-semibold text-white">{heartParts[hoveredPart].name}</span>
-              <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full text-white/50"
-                style={{ background: hexToRgba(heartParts[hoveredPart].hoverColor, 0.15) }}>
-                {heartParts[hoveredPart].type}
-              </span>
+            <div className="px-3.5 py-3">
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="text-sm font-bold text-white leading-none"
+                  style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+                  {heartParts[hoveredPart].name}
+                </span>
+                {(() => {
+                  const meta = TYPE_META[heartParts[hoveredPart].type];
+                  return (
+                    <span className="text-[8px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded-md flex-shrink-0"
+                      style={{ background: meta.bg, color: meta.color, border: `1px solid ${meta.border}` }}>
+                      {heartParts[hoveredPart].type}
+                    </span>
+                  );
+                })()}
+              </div>
+              <p className="text-[11px] leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
+                {heartParts[hoveredPart].shortDescription}
+              </p>
+              <div className="flex items-center gap-1 mt-2" style={{ color: heartParts[hoveredPart].hoverColor + "99" }}>
+                <span className="text-[9px] font-medium">Click to explore</span>
+                <ChevronRight className="w-3 h-3" />
+              </div>
             </div>
-            <p className="text-xs text-white/50 leading-snug">{heartParts[hoveredPart].shortDescription}</p>
           </motion.div>
         )}
       </AnimatePresence>
