@@ -2,10 +2,11 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Send, CheckCircle2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSuggestions } from "@/hooks/useSuggestions";
 
 const EDITORS = [
   { name: "Mishal Mohamed", email: "mishal.nediyodath@gmail.com" },
-  { name: "Alby Anish", email: "gallantyoungman@gmail.com" },
+  { name: "Alby Anish",     email: "gallantyoungman@gmail.com"    },
 ];
 
 const SUGGESTION_TYPES = [
@@ -17,28 +18,23 @@ const SUGGESTION_TYPES = [
 
 export default function Suggestions() {
   const { t } = useLanguage();
-  const [name, setName] = useState("");
-  const [type, setType] = useState("sug_type_general");
+  const { addSuggestion } = useSuggestions();
+
+  const [name, setName]       = useState("");
+  const [type, setType]       = useState("sug_type_general");
   const [message, setMessage] = useState("");
-  const [sent, setSent] = useState(false);
+  const [sent, setSent]       = useState(false);
 
   const canSend = name.trim().length > 0 && message.trim().length > 10;
 
   const handleSend = () => {
     if (!canSend) return;
-    const subject = encodeURIComponent(`[Heart Matters] ${t(type as "sug_type_general")} — from ${name}`);
-    const body = encodeURIComponent(
-      `Name: ${name}\nType: ${t(type as "sug_type_general")}\n\n${message}`
-    );
-    window.open(`mailto:${EDITORS[0].email}?cc=${EDITORS[1].email}&subject=${subject}&body=${body}`, "_blank");
+    addSuggestion(name.trim(), type, message.trim());
     setSent(true);
   };
 
   const reset = () => {
-    setName("");
-    setType("sug_type_general");
-    setMessage("");
-    setSent(false);
+    setName(""); setType("sug_type_general"); setMessage(""); setSent(false);
   };
 
   return (
@@ -51,10 +47,8 @@ export default function Suggestions() {
         <div className="max-w-4xl mx-auto relative z-10">
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }}>
             <p className="text-[11px] tracking-[0.14em] uppercase text-red-400 font-medium mb-4">{t("sug_badge")}</p>
-            <h1
-              className="text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight mb-5"
-              style={{ fontFamily: "'Cormorant Garamond', serif" }}
-            >
+            <h1 className="text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight mb-5"
+              style={{ fontFamily: "'Cormorant Garamond', serif" }}>
               {t("sug_title").split("\n").map((line, i) => (
                 <span key={i}>{line}{i === 0 && <br />}</span>
               ))}
@@ -71,26 +65,22 @@ export default function Suggestions() {
 
           {/* Form — left 3 cols */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.15 }}
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.15 }}
             className="md:col-span-3 space-y-6"
           >
             <AnimatePresence mode="wait">
               {sent ? (
                 <motion.div
                   key="success"
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0 }}
+                  initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
                   className="text-center py-16 flex flex-col items-center gap-4"
                 >
                   <CheckCircle2 className="h-14 w-14 text-green-600" />
                   <h2 className="text-2xl font-bold text-[#0f0c0c]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                    Your email client is open!
+                    Suggestion received!
                   </h2>
                   <p className="text-sm text-[#8a7070] leading-relaxed max-w-xs">
-                    Hit send in your email app. We read every message and reply within a week.
+                    Thank you, {name.split(" ")[0]}. The editors can read your suggestion in the admin panel.
                   </p>
                   <button
                     onClick={reset}
@@ -128,8 +118,8 @@ export default function Suggestions() {
                           className="px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer"
                           style={{
                             background: type === k ? "#0f0c0c" : "#f5ede8",
-                            color: type === k ? "#ffffff" : "#8a7070",
-                            border: type === k ? "1px solid #0f0c0c" : "1px solid #e8d8d4",
+                            color:      type === k ? "#ffffff" : "#8a7070",
+                            border:     type === k ? "1px solid #0f0c0c" : "1px solid #e8d8d4",
                           }}
                         >
                           {t(k)}
@@ -157,14 +147,14 @@ export default function Suggestions() {
                   <button
                     onClick={handleSend}
                     disabled={!canSend}
-                    className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-xl font-semibold text-sm text-white transition-all cursor-pointer"
+                    className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-xl font-semibold text-sm transition-all"
                     style={{
                       background: canSend ? "#0f0c0c" : "#e8d8d4",
-                      color: canSend ? "#ffffff" : "#c0a8a8",
-                      cursor: canSend ? "pointer" : "not-allowed",
+                      color:      canSend ? "#ffffff" : "#c0a8a8",
+                      cursor:     canSend ? "pointer" : "not-allowed",
                     }}
                     onMouseEnter={e => { if (canSend) e.currentTarget.style.background = "#b91c1c"; }}
-                    onMouseLeave={e => { if (canSend) e.currentTarget.style.background = "#0f0c0c"; }}
+                    onMouseLeave={e => { if (canSend) e.currentTarget.style.background = canSend ? "#0f0c0c" : "#e8d8d4"; }}
                   >
                     <Send className="h-4 w-4" />
                     {t("sug_send")}
@@ -174,7 +164,9 @@ export default function Suggestions() {
                     {t("sug_or_email")}:{" "}
                     {EDITORS.map((e, i) => (
                       <span key={e.email}>
-                        <a href={`mailto:${e.email}`} className="text-red-600 hover:text-red-700 transition-colors font-mono text-[10px]">{e.email}</a>
+                        <a href={`mailto:${e.email}`} className="text-red-600 hover:text-red-700 transition-colors font-mono text-[10px]">
+                          {e.email}
+                        </a>
                         {i < EDITORS.length - 1 && " · "}
                       </span>
                     ))}
@@ -186,12 +178,9 @@ export default function Suggestions() {
 
           {/* Sidebar — right 2 cols */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
+            initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.3 }}
             className="md:col-span-2 space-y-6"
           >
-            {/* What we welcome */}
             <div className="border border-[#e8d8d4] rounded-2xl p-6">
               <p className="text-[10px] uppercase tracking-widest text-[#8a7070] font-medium mb-4">{t("sug_types_title")}</p>
               <ul className="space-y-3">
@@ -204,7 +193,6 @@ export default function Suggestions() {
               </ul>
             </div>
 
-            {/* Direct email contacts */}
             <div className="space-y-3">
               <p className="text-[10px] uppercase tracking-widest text-[#c0a8a8] font-medium px-1">Editors</p>
               {EDITORS.map(editor => (

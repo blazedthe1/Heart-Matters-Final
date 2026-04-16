@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { HeartExplorerModal } from "@/components/HeartExplorer";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { HeartDefenderModal } from "@/components/interactables/HeartDefender";
-import { BPChecker } from "@/components/interactables/BPChecker";
 import { HRCalculator } from "@/components/interactables/HRCalculator";
 import { MythFact } from "@/components/interactables/MythFact";
 import { ToolCard } from "@/components/interactables/ToolCard";
@@ -77,19 +76,6 @@ export default function Interactables() {
             {t("int_explorer_cta")}
           </div>
         </motion.button>
-
-        {/* Blood Pressure Checker */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className="w-full max-w-2xl">
-          <ToolCard
-            icon="🩺"
-            title={t("int_bp_title")}
-            desc={t("int_bp_desc")}
-            color="#ef4444"
-            borderColor="rgba(239,68,68,0.3)"
-          >
-            <BPChecker />
-          </ToolCard>
-        </motion.div>
 
         {/* Heart Rate Zone Calculator */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }} className="w-full max-w-2xl">
