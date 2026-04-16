@@ -21,6 +21,8 @@ export function Footer() {
           <ul className="space-y-3 text-sm">
             <li><Link href="/articles" className="hover:text-white transition-colors">{t("footer_all_art")}</Link></li>
             <li><Link href="/risk-assessment" className="hover:text-white transition-colors">{t("footer_quiz")}</Link></li>
+            <li><Link href="/interactables" className="hover:text-white transition-colors">{t("nav_interactables")}</Link></li>
+            <li><Link href="/suggestions" className="hover:text-white transition-colors">{t("nav_suggestions")}</Link></li>
             <li><Link href="/resources" className="hover:text-white transition-colors">{t("nav_resources")}</Link></li>
           </ul>
         </div>

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Pause, Play, Zap, Shield, Heart, ChevronRight, RotateCcw } from "lucide-react";
+import { X, Pause, Play, ChevronDown, ChevronUp, RotateCcw } from "lucide-react";
 import { HeartExplorerModal } from "@/components/HeartExplorer";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -390,8 +390,8 @@ function GameModal({ onClose }: { onClose: () => void }) {
 
   const handleLeave = () => { leaveGame(); onClose(); };
 
-  const lives = Math.max(display.lives, 0);
-  const maxLives = 5;
+  const hearts = Array.from({ length: Math.max(display.lives, 0) }, (_, i) => i < display.lives ? "❤️" : "");
+  const emptyHearts = Array.from({ length: Math.max(3 - display.lives, 0) }, () => "🖤");
 
   return (
     <motion.div
@@ -399,108 +399,79 @@ function GameModal({ onClose }: { onClose: () => void }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.92)", backdropFilter: "blur(20px)" }}
+      style={{ background: "rgba(0,0,0,0.9)", backdropFilter: "blur(16px)" }}
       onClick={handleLeave}
     >
       <motion.div
-        initial={{ scale: 0.92, opacity: 0, y: 16 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.92, opacity: 0, y: 16 }}
-        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+        initial={{ scale: 0.94, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.94, opacity: 0 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
         className="relative flex flex-col items-center gap-3 w-full max-w-[520px]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ── HUD ── */}
-        <div className="flex items-stretch justify-between w-full gap-3">
-          {/* Score */}
-          <div className="flex-1 rounded-xl px-4 py-2.5 flex flex-col justify-center"
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <span className="text-[9px] tracking-[0.18em] uppercase text-white/30 mb-0.5">Score</span>
-            <span className="text-2xl font-bold text-white tabular-nums leading-none">{display.score}</span>
+        {/* HUD */}
+        <div className="flex items-center justify-between w-full px-1">
+          <div className="flex flex-col min-w-[60px]">
+            <span className="text-[9px] tracking-widest uppercase text-white/25 mb-0.5">Score</span>
+            <span className="text-2xl font-bold text-white tabular-nums">{display.score}</span>
           </div>
 
-          {/* Lives + status */}
-          <div className="flex-1 rounded-xl px-4 py-2.5 flex flex-col items-center justify-center gap-1"
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <div className="flex gap-0.5">
-              {Array.from({ length: maxLives }).map((_, i) => (
-                <span key={i} className="text-base transition-all duration-200"
-                  style={{ opacity: i < lives ? 1 : 0.15, filter: i < lives ? "drop-shadow(0 0 4px #f43f5e)" : "none" }}>
-                  ❤️
-                </span>
-              ))}
-            </div>
+          <div className="flex flex-col items-center gap-1">
+            <div className="flex gap-0.5 text-lg">{hearts.join("")}{emptyHearts.join("")}</div>
             {display.shieldActive && (
-              <span className="text-[9px] tracking-widest uppercase text-yellow-400 font-bold animate-pulse flex items-center gap-1">
-                <span>⭐</span> Shield Active
-              </span>
+              <span className="text-[9px] tracking-widest uppercase text-yellow-400 font-semibold animate-pulse">⭐ Shield</span>
             )}
             {display.combo >= 3 && display.phase === "playing" && (
-              <span className="text-[9px] font-bold text-emerald-400 flex items-center gap-0.5">
-                🔥 {display.combo}x combo
-              </span>
+              <span className="text-[10px] font-bold text-green-400">🔥 {display.combo}x combo</span>
             )}
           </div>
 
-          {/* Best + controls */}
-          <div className="flex-1 rounded-xl px-4 py-2.5 flex flex-col justify-center items-end"
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <span className="text-[9px] tracking-[0.18em] uppercase text-white/30 mb-0.5">Best</span>
-            <span className="text-2xl font-bold text-white/40 tabular-nums leading-none">{display.hiScore}</span>
-          </div>
-
-          {/* Action buttons */}
-          <div className="flex flex-col gap-2 justify-center">
+          <div className="flex items-center gap-2 min-w-[60px] justify-end">
+            <div className="flex flex-col items-end">
+              <span className="text-[9px] tracking-widest uppercase text-white/25 mb-0.5">Best</span>
+              <span className="text-xl font-bold text-white/40 tabular-nums">{display.hiScore}</span>
+            </div>
             {(display.phase === "playing" || display.phase === "paused") && (
-              <button onClick={togglePause}
-                className="w-9 h-9 flex items-center justify-center rounded-xl transition-all cursor-pointer"
-                style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
-                onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.12)")}
-                onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.06)")}>
+              <button onClick={togglePause} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer">
                 {display.phase === "paused" ? <Play className="w-3.5 h-3.5 text-white/70" /> : <Pause className="w-3.5 h-3.5 text-white/70" />}
               </button>
             )}
-            <button onClick={handleLeave}
-              className="w-9 h-9 flex items-center justify-center rounded-xl transition-all cursor-pointer"
-              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
-              onMouseEnter={e => (e.currentTarget.style.background = "rgba(220,38,38,0.2)")}
-              onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.06)")}>
+            <button onClick={handleLeave} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer">
               <X className="w-4 h-4 text-white/60" />
             </button>
           </div>
         </div>
 
-        {/* ── Level bar ── */}
+        {/* Level badge */}
         {display.phase === "playing" && (
-          <div className="flex items-center gap-3 self-stretch">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg"
-              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}>
-              <span className="text-[9px] tracking-widest uppercase text-white/25">Lv</span>
-              <span className="text-xs font-bold text-white/80">{display.level}</span>
+          <div className="flex items-center gap-3 self-stretch px-1">
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.05] border border-white/[0.07]">
+              <span className="text-[9px] tracking-widest uppercase text-white/25">Level</span>
+              <span className="text-xs font-bold text-white/70">{display.level}</span>
             </div>
-            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-              <motion.div className="h-full rounded-full bg-gradient-to-r from-red-700 to-red-500"
-                animate={{ width: `${((display.score % 100) / 100) * 100}%` }}
-                transition={{ duration: 0.3 }} />
+            <div className="flex-1 h-1 rounded-full bg-white/[0.07] overflow-hidden">
+              <div className="h-full rounded-full bg-red-600 transition-all duration-300"
+                style={{ width: `${((display.score % 100) / 100) * 100}%` }} />
             </div>
-            <span className="text-[9px] text-white/25 tabular-nums">{100 - (display.score % 100)} pts</span>
+            <span className="text-[9px] text-white/25">{100 - (display.score % 100)} to next</span>
           </div>
         )}
 
-        {/* ── Difficulty ── */}
+        {/* Difficulty selector */}
         <AnimatePresence>
           {display.phase !== "playing" && (
             <motion.div
               initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }} className="flex gap-2 overflow-hidden self-stretch"
+              exit={{ opacity: 0, height: 0 }} className="flex gap-2 overflow-hidden"
             >
               {(Object.keys(DIFFICULTIES) as Difficulty[]).map((d) => (
                 <button key={d} onClick={() => setDifficulty(d)}
-                  className="flex-1 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer"
+                  className="px-4 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer"
                   style={{
-                    background: difficulty === d ? DIFFICULTIES[d].color + "18" : "rgba(255,255,255,0.04)",
-                    border: `1px solid ${difficulty === d ? DIFFICULTIES[d].color + "55" : "rgba(255,255,255,0.07)"}`,
-                    color: difficulty === d ? DIFFICULTIES[d].color : "rgba(255,255,255,0.35)",
+                    background: difficulty === d ? DIFFICULTIES[d].color + "22" : "rgba(255,255,255,0.05)",
+                    border: `1px solid ${difficulty === d ? DIFFICULTIES[d].color + "66" : "rgba(255,255,255,0.08)"}`,
+                    color: difficulty === d ? DIFFICULTIES[d].color : "rgba(255,255,255,0.4)",
                   }}>
                   {DIFFICULTIES[d].label}
                 </button>
@@ -509,9 +480,9 @@ function GameModal({ onClose }: { onClose: () => void }) {
           )}
         </AnimatePresence>
 
-        {/* ── Canvas ── */}
-        <div className="relative rounded-2xl overflow-hidden self-stretch"
-          style={{ boxShadow: "0 0 80px rgba(185,28,28,0.2), 0 0 0 1px rgba(255,255,255,0.06)" }}>
+        {/* Canvas */}
+        <div className="relative rounded-2xl overflow-hidden"
+          style={{ boxShadow: "0 0 80px rgba(185,28,28,0.25), 0 0 0 1px rgba(255,255,255,0.07)" }}>
           <canvas
             ref={canvasRef}
             width={W} height={H}
@@ -523,13 +494,10 @@ function GameModal({ onClose }: { onClose: () => void }) {
 
           <AnimatePresence>
             {(display.phase === "idle" || display.phase === "over" || display.phase === "paused") && (
-              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }}
-                transition={{ duration: 0.2 }} className="absolute inset-0 flex items-end justify-center pb-10">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }} className="absolute inset-0 flex items-end justify-center pb-10">
                 <button onClick={display.phase === "paused" ? togglePause : startGame}
-                  className="relative overflow-hidden text-white font-semibold text-sm px-10 py-3.5 rounded-full cursor-pointer transition-all active:scale-95"
-                  style={{ background: "linear-gradient(135deg, #b91c1c, #7f1d1d)", boxShadow: "0 4px 24px rgba(185,28,28,0.5), 0 0 0 1px rgba(255,255,255,0.1) inset" }}
-                  onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 4px 32px rgba(220,38,38,0.6), 0 0 0 1px rgba(255,255,255,0.15) inset")}
-                  onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 4px 24px rgba(185,28,28,0.5), 0 0 0 1px rgba(255,255,255,0.1) inset")}>
+                  className="bg-red-700 hover:bg-red-600 active:scale-95 transition-all text-white font-semibold text-sm px-10 py-3.5 rounded-full cursor-pointer shadow-lg shadow-red-900/50">
                   {display.phase === "idle" ? "▶  Play" : display.phase === "paused" ? "▶  Resume" : "↺  Play Again"}
                 </button>
               </motion.div>
@@ -537,604 +505,501 @@ function GameModal({ onClose }: { onClose: () => void }) {
           </AnimatePresence>
         </div>
 
-        {/* ── Legend ── */}
-        <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-[11px]"
-          style={{ color: "rgba(255,255,255,0.2)" }}>
+        {/* Legend */}
+        <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 text-xs text-white/25">
           <span>✅ {GOOD.join(" ")}</span>
           <span>❌ {BAD.join(" ")}</span>
           <span>✨ {POWERUP.join(" ")} power-ups</span>
         </div>
-        <p className="text-[10px] text-center" style={{ color: "rgba(255,255,255,0.12)", letterSpacing: "0.04em" }}>
-          Mouse / touch · ← → or A D · Esc to pause · click outside to close
+        <p className="text-[10px] text-white/15 tracking-wide text-center">
+          Mouse / touch to aim &nbsp;·&nbsp; ← → or A D to move &nbsp;·&nbsp; Esc to pause &nbsp;·&nbsp; click outside to close
         </p>
       </motion.div>
     </motion.div>
   );
 }
 
-/* ─── Cardiac Timeline ───────────────────────────────────────────── */
+/* ─── Blood Pressure Checker ─────────────────────────────────────── */
 
-const TIMELINE_STAGES = [
-  {
-    age: "20s", title: "Early Adulthood", subtitle: "Habits formed now echo for decades.",
-    color: "#60a5fa", bg: "rgba(96,165,250,0.08)",
-    choices: [
-      { id: "20-fast",   emoji: "🍔", label: "Mostly fast food & processed snacks",    impact: -2, desc: "High sodium and trans fats begin building arterial plaque early." },
-      { id: "20-active", emoji: "🏃", label: "Regular exercise — gym or sport",         impact:  3, desc: "Aerobic fitness in your 20s lowers lifetime cardiovascular risk by up to 35%." },
-      { id: "20-smoke",  emoji: "🚬", label: "Social smoking — just on weekends",       impact: -3, desc: "There's no safe level. Even light smoking accelerates arterial stiffness." },
-      { id: "20-sleep",  emoji: "😴", label: "Consistent 7–8 hrs of sleep",            impact:  2, desc: "Quality sleep regulates blood pressure and inflammatory markers." },
-    ],
-  },
-  {
-    age: "30s", title: "Career & Family", subtitle: "Stress peaks. So does risk — if unchecked.",
-    color: "#f59e0b", bg: "rgba(245,158,11,0.08)",
-    choices: [
-      { id: "30-stress",  emoji: "😰", label: "High-stress job, rarely decompress",         impact: -2, desc: "Chronic stress elevates cortisol, raising blood pressure and inflammation." },
-      { id: "30-checkup", emoji: "🩺", label: "Annual health checks, know your numbers",     impact:  3, desc: "Catching hypertension or high cholesterol early is one of the highest-value interventions." },
-      { id: "30-drink",   emoji: "🍷", label: "Unwinding with 2–3 drinks most nights",       impact: -2, desc: "Regular alcohol raises triglycerides and blood pressure over time." },
-      { id: "30-cook",    emoji: "🥗", label: "Cooking most meals at home",                  impact:  2, desc: "Home cooking correlates with lower sodium intake and better dietary variety." },
-    ],
-  },
-  {
-    age: "40s", title: "Midlife", subtitle: "The decade where risk factors compound.",
-    color: "#f97316", bg: "rgba(249,115,22,0.08)",
-    choices: [
-      { id: "40-sedentary", emoji: "💺", label: "Mostly desk-bound, little movement",          impact: -2, desc: "Sedentary time increases cardiovascular mortality independently of exercise." },
-      { id: "40-quit",      emoji: "🚭", label: "Quitting smoking if you hadn't already",      impact:  3, desc: "Within 10 years of quitting, heart disease risk halves regardless of history." },
-      { id: "40-med",       emoji: "💊", label: "Managing blood pressure with medication",      impact:  2, desc: "Controlled hypertension dramatically reduces stroke and heart attack risk." },
-      { id: "40-weight",    emoji: "⚖️", label: "Significant weight gain over the decade",     impact: -2, desc: "Visceral fat is metabolically active and promotes systemic inflammation." },
-    ],
-  },
-  {
-    age: "50s", title: "Pre-Senior", subtitle: "Small changes still move the needle significantly.",
-    color: "#e24b4a", bg: "rgba(226,75,74,0.08)",
-    choices: [
-      { id: "50-walk",    emoji: "🚶", label: "Daily 30-min walk, no matter what",          impact:  3, desc: "Moderate walking at 50+ reduces cardiovascular events by over 30%." },
-      { id: "50-diet",    emoji: "🫒", label: "Switching to a Mediterranean-style diet",     impact:  2, desc: "The PREDIMED trial showed a 30% reduction in major cardiovascular events." },
-      { id: "50-mental",  emoji: "🧠", label: "Ignoring mental health, pushing through",     impact: -2, desc: "Depression and anxiety are independent risk factors for heart disease." },
-      { id: "50-social",  emoji: "🤝", label: "Strong social connections & community",       impact:  2, desc: "Social isolation carries cardiovascular risk comparable to smoking 15 cigarettes a day." },
-    ],
-  },
-] as const;
-
-const TL_MAX = TIMELINE_STAGES.length * 3;
-
-function tlOutcome(score: number) {
-  const p = score / TL_MAX;
-  if (p >= 0.8) return { label: "Exceptional heart health", emoji: "❤️",  color: "#22c55e", heartAge: "−8 yrs", desc: "Your lifetime choices have given your cardiovascular system a real advantage. Your heart age is significantly below your chronological age." };
-  if (p >= 0.55) return { label: "Good cardiovascular health", emoji: "🧡", color: "#f59e0b", heartAge: "−2 yrs", desc: "Mostly healthy choices with some areas of risk. Your heart is in reasonable shape — targeted improvements could push you into excellent territory." };
-  if (p >= 0.3) return { label: "Elevated risk profile",       emoji: "🩶", color: "#f97316", heartAge: "+5 yrs", desc: "Accumulated risk factors have added years to your heart's age. Many of these are reversible with sustained lifestyle change." };
-  return         { label: "High cardiovascular risk",          emoji: "🖤", color: "#ef4444", heartAge: "+12 yrs", desc: "A pattern of high-risk choices significantly increases lifetime risk. It's never too late — every positive change helps." };
+function getBPCategory(sys: number, dia: number, t: (k: string) => string) {
+  if (sys >= 180 || dia >= 120) return { key: "crisis",  color: "#7f1d1d", border: "#991b1b", text: "#fca5a5", label: t("int_bp_crisis"),  desc: t("int_bp_crisis_desc"),  icon: "🚨" };
+  if (sys >= 140 || dia >= 90)  return { key: "high2",   color: "#7f1d1d", border: "#b91c1c", text: "#fca5a5", label: t("int_bp_high2"),   desc: t("int_bp_high2_desc"),   icon: "⚠️" };
+  if (sys >= 130 || dia >= 80)  return { key: "high1",   color: "#431407", border: "#c2410c", text: "#fdba74", label: t("int_bp_high1"),   desc: t("int_bp_high1_desc"),   icon: "⚠️" };
+  if (sys >= 120 && dia < 80)   return { key: "elevated",color: "#1c1917", border: "#92400e", text: "#fcd34d", label: t("int_bp_elevated"), desc: t("int_bp_elevated_desc"), icon: "📊" };
+  return                               { key: "normal",  color: "#052e16", border: "#166534", text: "#86efac", label: t("int_bp_normal"),   desc: t("int_bp_normal_desc"),   icon: "✅" };
 }
 
-function TLMeter({ score, max }: { score: number; max: number }) {
-  const pct = Math.max(0, Math.min(1, score / max));
-  const col = pct >= 0.75 ? "#22c55e" : pct >= 0.5 ? "#f59e0b" : pct >= 0.25 ? "#f97316" : "#ef4444";
+function BPChecker() {
+  const { t } = useLanguage();
+  const [sys, setSys] = useState("");
+  const [dia, setDia] = useState("");
+  const [result, setResult] = useState<ReturnType<typeof getBPCategory> | null>(null);
+  const [error, setError] = useState("");
+
+  const check = () => {
+    const s = parseInt(sys), d = parseInt(dia);
+    if (isNaN(s) || isNaN(d) || s < 60 || s > 250 || d < 40 || d > 150) {
+      setError("Please enter valid readings (systolic 60-250, diastolic 40-150).");
+      setResult(null);
+      return;
+    }
+    setError("");
+    setResult(getBPCategory(s, d, t));
+  };
+
+  const reset = () => { setSys(""); setDia(""); setResult(null); setError(""); };
+
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>Heart health</span>
-      <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
-        <motion.div className="h-full rounded-full" style={{ background: col }}
-          animate={{ width: `${pct * 100}%` }} transition={{ duration: 0.5, ease: "easeOut" }} />
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-[11px] uppercase tracking-widest text-white/40 mb-2 font-medium">{t("int_bp_systolic")}</label>
+          <input
+            type="number" value={sys} onChange={e => setSys(e.target.value)}
+            placeholder="e.g. 120" min={60} max={250}
+            className="w-full rounded-xl px-4 py-3 text-white text-lg font-semibold outline-none transition-all"
+            style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}
+            onFocus={e => (e.currentTarget.style.borderColor = "rgba(239,68,68,0.6)")}
+            onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)")}
+          />
+        </div>
+        <div>
+          <label className="block text-[11px] uppercase tracking-widest text-white/40 mb-2 font-medium">{t("int_bp_diastolic")}</label>
+          <input
+            type="number" value={dia} onChange={e => setDia(e.target.value)}
+            placeholder="e.g. 80" min={40} max={150}
+            className="w-full rounded-xl px-4 py-3 text-white text-lg font-semibold outline-none transition-all"
+            style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}
+            onFocus={e => (e.currentTarget.style.borderColor = "rgba(239,68,68,0.6)")}
+            onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)")}
+          />
+        </div>
       </div>
-      <span className="text-xs tabular-nums font-medium" style={{ color: col, minWidth: 28 }}>
-        {Math.round(pct * 100)}%
-      </span>
+
+      {error && <p className="text-red-400 text-xs bg-red-950/40 border border-red-800/40 rounded-lg px-4 py-2">{error}</p>}
+
+      <div className="flex gap-3">
+        <button
+          onClick={check}
+          className="flex-1 py-3 rounded-xl font-semibold text-sm text-white transition-all active:scale-95 cursor-pointer"
+          style={{ background: "rgba(185,28,28,0.8)", border: "1px solid rgba(239,68,68,0.4)" }}
+          onMouseEnter={e => (e.currentTarget.style.background = "rgba(185,28,28,1)")}
+          onMouseLeave={e => (e.currentTarget.style.background = "rgba(185,28,28,0.8)")}
+        >
+          {t("int_bp_submit")}
+        </button>
+        {result && (
+          <button onClick={reset} className="px-4 py-3 rounded-xl text-white/50 hover:text-white transition-colors cursor-pointer"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <RotateCcw className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
+      <AnimatePresence>
+        {result && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6 }}
+            className="rounded-2xl p-5 space-y-2"
+            style={{ background: result.color, border: `1px solid ${result.border}` }}
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">{result.icon}</span>
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-white/40 font-medium mb-0.5">Result</p>
+                <p className="text-xl font-bold" style={{ color: result.text }}>{result.label}</p>
+              </div>
+              <div className="ml-auto text-right">
+                <p className="text-2xl font-bold text-white">{sys}/{dia}</p>
+                <p className="text-[10px] text-white/30 uppercase tracking-widest">mmHg</p>
+              </div>
+            </div>
+            <p className="text-sm leading-relaxed" style={{ color: result.text + "bb" }}>{result.desc}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Reference chart */}
+      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.07)" }}>
+        <div className="px-4 py-2.5 border-b" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.03)" }}>
+          <p className="text-[10px] uppercase tracking-widest text-white/30 font-medium">Reference Chart</p>
+        </div>
+        {[
+          { range: "< 120 / < 80", label: t("int_bp_normal"),   color: "#22c55e" },
+          { range: "120-129 / < 80", label: t("int_bp_elevated"), color: "#eab308" },
+          { range: "130-139 / 80-89", label: t("int_bp_high1"),  color: "#f97316" },
+          { range: "≥ 140 / ≥ 90", label: t("int_bp_high2"),    color: "#ef4444" },
+          { range: "≥ 180 / ≥ 120", label: t("int_bp_crisis"),  color: "#dc2626" },
+        ].map((row, i) => (
+          <div key={i} className="flex items-center justify-between px-4 py-2.5"
+            style={{ borderBottom: i < 4 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
+            <span className="text-xs font-mono text-white/40">{row.range}</span>
+            <span className="text-xs font-semibold" style={{ color: row.color }}>{row.label}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
-function TLChoiceBtn({ choice, selected, locked, onSelect }: {
-  choice: typeof TIMELINE_STAGES[0]["choices"][0];
-  selected: boolean; locked: boolean; onSelect: () => void;
-}) {
-  const good = choice.impact > 0;
+/* ─── Heart Rate Zone Calculator ─────────────────────────────────── */
+
+const HR_ZONES = [
+  { key: "int_hr_zone_rest",      pct: [50, 60], color: "#6366f1", bg: "#1e1b4b" },
+  { key: "int_hr_zone_fatburn",   pct: [60, 70], color: "#22c55e", bg: "#052e16" },
+  { key: "int_hr_zone_aerobic",   pct: [70, 80], color: "#3b82f6", bg: "#0c1a2e" },
+  { key: "int_hr_zone_anaerobic", pct: [80, 90], color: "#f59e0b", bg: "#1c0f00" },
+  { key: "int_hr_zone_max",       pct: [90, 100],color: "#ef4444", bg: "#2d0a0a" },
+] as const;
+
+function HRCalculator() {
+  const { t } = useLanguage();
+  const [age, setAge] = useState("");
+  const [maxHR, setMaxHR] = useState<number | null>(null);
+  const [error, setError] = useState("");
+
+  const calculate = () => {
+    const a = parseInt(age);
+    if (isNaN(a) || a < 10 || a > 100) {
+      setError("Please enter a valid age between 10 and 100.");
+      setMaxHR(null);
+      return;
+    }
+    setError("");
+    setMaxHR(220 - a);
+  };
+
+  const reset = () => { setAge(""); setMaxHR(null); setError(""); };
+
   return (
-    <motion.button onClick={onSelect} disabled={locked}
-      whileHover={!locked ? { scale: 1.015 } : {}} whileTap={!locked ? { scale: 0.985 } : {}}
-      className="w-full text-left rounded-xl px-4 py-3 transition-all cursor-pointer disabled:cursor-default"
-      style={{
-        background: selected ? (good ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)") : "rgba(255,255,255,0.03)",
-        border: `1px solid ${selected ? (good ? "rgba(34,197,94,0.35)" : "rgba(239,68,68,0.35)") : "rgba(255,255,255,0.07)"}`,
-      }}>
-      <div className="flex items-start gap-3">
-        <span className="text-xl flex-shrink-0 mt-0.5">{choice.emoji}</span>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium leading-snug"
-            style={{ color: selected ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.6)" }}>
-            {choice.label}
-          </p>
-          <AnimatePresence>
-            {selected && (
-              <motion.p initial={{ opacity: 0, height: 0, marginTop: 0 }} animate={{ opacity: 1, height: "auto", marginTop: 6 }}
-                exit={{ opacity: 0, height: 0, marginTop: 0 }} className="text-xs leading-relaxed overflow-hidden"
-                style={{ color: good ? "rgba(134,239,172,0.8)" : "rgba(252,165,165,0.8)" }}>
-                {choice.desc}
-              </motion.p>
-            )}
-          </AnimatePresence>
+    <div className="space-y-5">
+      <div>
+        <label className="block text-[11px] uppercase tracking-widest text-white/40 mb-2 font-medium">{t("int_hr_age")}</label>
+        <div className="flex gap-3">
+          <input
+            type="number" value={age} onChange={e => setAge(e.target.value)}
+            placeholder="e.g. 16" min={10} max={100}
+            className="flex-1 rounded-xl px-4 py-3 text-white text-lg font-semibold outline-none transition-all"
+            style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}
+            onFocus={e => (e.currentTarget.style.borderColor = "rgba(239,68,68,0.6)")}
+            onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)")}
+            onKeyDown={e => e.key === "Enter" && calculate()}
+          />
+          <button
+            onClick={calculate}
+            className="px-6 py-3 rounded-xl font-semibold text-sm text-white transition-all active:scale-95 cursor-pointer"
+            style={{ background: "rgba(185,28,28,0.8)", border: "1px solid rgba(239,68,68,0.4)" }}
+            onMouseEnter={e => (e.currentTarget.style.background = "rgba(185,28,28,1)")}
+            onMouseLeave={e => (e.currentTarget.style.background = "rgba(185,28,28,0.8)")}
+          >
+            {t("int_hr_submit")}
+          </button>
+          {maxHR && (
+            <button onClick={reset} className="px-4 py-3 rounded-xl text-white/50 hover:text-white transition-colors cursor-pointer"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          )}
         </div>
-        {selected && (
-          <span className="text-sm font-bold flex-shrink-0" style={{ color: good ? "#4ade80" : "#f87171" }}>
-            {good ? `+${choice.impact}` : choice.impact}
-          </span>
-        )}
       </div>
-    </motion.button>
+
+      {error && <p className="text-red-400 text-xs bg-red-950/40 border border-red-800/40 rounded-lg px-4 py-2">{error}</p>}
+
+      <AnimatePresence>
+        {maxHR && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-3">
+            <div className="flex items-center gap-3 rounded-xl px-5 py-3.5"
+              style={{ background: "rgba(185,28,28,0.15)", border: "1px solid rgba(239,68,68,0.25)" }}>
+              <span className="text-2xl">❤️</span>
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-white/40 font-medium">{t("int_hr_maxrate")}</p>
+                <p className="text-2xl font-bold text-white">{maxHR} <span className="text-sm font-normal text-white/40">{t("int_hr_bpm")}</span></p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {HR_ZONES.map((z, i) => {
+                const lo = Math.round(maxHR * z.pct[0] / 100);
+                const hi = Math.round(maxHR * z.pct[1] / 100);
+                return (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.07 }}
+                    className="rounded-xl px-4 py-3 flex items-center justify-between gap-4"
+                    style={{ background: z.bg, border: `1px solid ${z.color}22` }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: z.color }} />
+                      <span className="text-sm font-semibold" style={{ color: z.color }}>{t(z.key)}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-right">
+                      <span className="text-sm font-mono text-white/70">{lo}–{hi} {t("int_hr_bpm")}</span>
+                      <div className="hidden sm:flex items-center gap-1 rounded-full px-2 py-0.5"
+                        style={{ background: `${z.color}18` }}>
+                        <span className="text-[10px] font-medium" style={{ color: z.color }}>{z.pct[0]}–{z.pct[1]}%</span>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
-function CardiacTimelineModal({ onClose }: { onClose: () => void }) {
-  const [stageIdx, setStageIdx] = useState(0);
-  const [picks, setPicks] = useState<Record<number, string>>({});
-  const [score, setScore] = useState(0);
-  const [done, setDone] = useState(false);
-  const [confirming, setConfirming] = useState(false);
+/* ─── Myth vs Fact ───────────────────────────────────────────────── */
 
-  const stage = TIMELINE_STAGES[stageIdx];
-  const pickedId = picks[stageIdx];
-  const isLast = stageIdx === TIMELINE_STAGES.length - 1;
-  const outcome = tlOutcome(score);
+function MythFact() {
+  const { t } = useLanguage();
+  const [flipped, setFlipped] = useState<Record<number, boolean>>({});
 
-  const handlePick = (choice: typeof stage.choices[0]) => {
-    if (picks[stageIdx]) return;
-    setPicks(p => ({ ...p, [stageIdx]: choice.id }));
-    setScore(s => s + choice.impact);
-    setConfirming(true);
-  };
+  const cards = [1, 2, 3, 4, 5, 6];
 
-  const handleNext = () => {
-    setConfirming(false);
-    if (isLast) setDone(true);
-    else setStageIdx(i => i + 1);
-  };
-
-  const handleReset = () => {
-    setStageIdx(0); setPicks({}); setScore(0); setDone(false); setConfirming(false);
-  };
+  const toggle = (i: number) => setFlipped(f => ({ ...f, [i]: !f[i] }));
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.92)", backdropFilter: "blur(20px)" }}
-      onClick={onClose}>
-      <motion.div
-        initial={{ scale: 0.92, opacity: 0, y: 16 }} animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.92, opacity: 0, y: 16 }} transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-        className="relative w-full max-w-md rounded-2xl overflow-hidden flex flex-col"
-        style={{ background: "#0b0808", border: "1px solid rgba(255,255,255,0.07)", maxHeight: "calc(100vh - 32px)" }}
-        onClick={e => e.stopPropagation()}>
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {cards.map((n) => {
+          const isFlipped = !!flipped[n];
+          return (
+            <motion.button
+              key={n}
+              onClick={() => toggle(n)}
+              className="relative rounded-2xl p-5 text-left cursor-pointer transition-all duration-300 overflow-hidden"
+              style={{
+                background: isFlipped ? "rgba(5,46,22,0.8)" : "rgba(255,255,255,0.04)",
+                border: isFlipped ? "1px solid rgba(34,197,94,0.3)" : "1px solid rgba(255,255,255,0.09)",
+                minHeight: 110,
+              }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <AnimatePresence mode="wait">
+                {!isFlipped ? (
+                  <motion.div key="myth" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
+                    <div className="flex items-center gap-2 mb-2.5">
+                      <span className="text-[9px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full"
+                        style={{ background: "rgba(239,68,68,0.2)", color: "#f87171" }}>
+                        {t("int_myth_label")}
+                      </span>
+                    </div>
+                    <p className="text-sm text-white/70 leading-relaxed font-medium">{t(`int_myth${n}`)}</p>
+                    <p className="text-[10px] text-white/25 mt-3 flex items-center gap-1">
+                      <span>👆</span> {t("int_tap_to_flip")}
+                    </p>
+                  </motion.div>
+                ) : (
+                  <motion.div key="fact" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
+                    <div className="flex items-center gap-2 mb-2.5">
+                      <span className="text-[9px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full"
+                        style={{ background: "rgba(34,197,94,0.2)", color: "#4ade80" }}>
+                        ✓ {t("int_fact_label")}
+                      </span>
+                    </div>
+                    <p className="text-sm text-green-200/80 leading-relaxed">{t(`int_fact${n}`)}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.button>
+          );
+        })}
+      </div>
+      <p className="text-center text-[11px] text-white/20 mt-2">{t("int_myth_desc")}</p>
+    </div>
+  );
+}
 
-        {/* Header */}
-        <div className="px-5 pt-5 pb-4 flex-shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#e24b4a" }} />
-              <span className="text-[9px] tracking-[0.2em] uppercase font-bold" style={{ color: "rgba(255,255,255,0.3)" }}>
-                Cardiac Timeline
-              </span>
+/* ─── Expandable Tool Card ────────────────────────────────────────── */
+
+interface ToolCardProps {
+  icon: string;
+  title: string;
+  desc: string;
+  color: string;
+  borderColor: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}
+
+function ToolCard({ icon, title, desc, color, borderColor, children, defaultOpen = false }: ToolCardProps) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <motion.div
+      layout
+      className="rounded-2xl overflow-hidden w-full max-w-2xl mx-auto"
+      style={{ border: `1px solid ${open ? borderColor : "rgba(255,255,255,0.08)"}`, transition: "border-color 0.3s" }}
+    >
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center gap-4 px-6 py-5 text-left cursor-pointer transition-all"
+        style={{ background: open ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.02)" }}
+        onMouseEnter={e => { if (!open) e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
+        onMouseLeave={e => { if (!open) e.currentTarget.style.background = "rgba(255,255,255,0.02)"; }}
+      >
+        <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl"
+          style={{ background: `${color}22`, border: `1px solid ${color}44` }}>
+          {icon}
+        </div>
+        <div className="flex-1 text-left">
+          <p className="text-sm font-semibold text-white">{title}</p>
+          <p className="text-xs text-white/35 mt-0.5">{desc}</p>
+        </div>
+        <div className="text-white/30 flex-shrink-0">
+          {open ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        </div>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            style={{ overflow: "hidden" }}
+          >
+            <div className="px-6 pb-6 pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+              {children}
             </div>
-            <div className="flex items-center gap-2">
-              {!done && (
-                <button onClick={handleReset}
-                  className="w-8 h-8 flex items-center justify-center rounded-xl transition-all cursor-pointer"
-                  style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
-                  onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.1)")}
-                  onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}>
-                  <RotateCcw className="w-3.5 h-3.5 text-white/40" />
-                </button>
-              )}
-              <button onClick={onClose}
-                className="w-8 h-8 flex items-center justify-center rounded-xl transition-all cursor-pointer"
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
-                onMouseEnter={e => (e.currentTarget.style.background = "rgba(220,38,38,0.2)")}
-                onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}>
-                <X className="w-4 h-4 text-white/50" />
-              </button>
-            </div>
-          </div>
-          {/* Progress pips */}
-          <div className="flex gap-1.5 mb-3">
-            {TIMELINE_STAGES.map((s, i) => (
-              <div key={i} className="flex-1 h-0.5 rounded-full transition-all duration-500"
-                style={{ background: i < stageIdx || done ? TIMELINE_STAGES[i].color : i === stageIdx && !done ? `${TIMELINE_STAGES[i].color}55` : "rgba(255,255,255,0.08)" }} />
-            ))}
-          </div>
-          <TLMeter score={score + TL_MAX / 2} max={TL_MAX + TL_MAX / 2} />
-        </div>
-
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "none" }}>
-          <AnimatePresence mode="wait">
-            {done ? (
-              <motion.div key="results" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                className="px-5 py-6 flex flex-col gap-5">
-                {/* Outcome */}
-                <div className="rounded-2xl px-5 py-5 text-center"
-                  style={{ background: `${outcome.color}0f`, border: `1px solid ${outcome.color}30` }}>
-                  <div className="text-5xl mb-3">{outcome.emoji}</div>
-                  <p className="text-lg font-bold text-white mb-2" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
-                    {outcome.label}
-                  </p>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-3"
-                    style={{ background: `${outcome.color}18`, border: `1px solid ${outcome.color}30` }}>
-                    <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: outcome.color }}>Heart age</span>
-                    <span className="text-sm font-bold" style={{ color: outcome.color }}>{outcome.heartAge}</span>
-                  </div>
-                  <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>{outcome.desc}</p>
-                </div>
-                {/* Recap */}
-                <div>
-                  <p className="text-[9px] tracking-widest uppercase font-bold mb-3" style={{ color: "rgba(255,255,255,0.2)" }}>Your journey</p>
-                  <div className="flex flex-col gap-2">
-                    {TIMELINE_STAGES.map((s, i) => {
-                      const picked = s.choices.find(c => c.id === picks[i]);
-                      if (!picked) return null;
-                      const good = picked.impact > 0;
-                      return (
-                        <div key={i} className="flex items-center gap-3 rounded-xl px-3 py-2.5"
-                          style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.05)" }}>
-                          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-sm"
-                            style={{ background: `${s.color}18`, border: `1px solid ${s.color}30` }}>
-                            {picked.emoji}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[10px] font-bold uppercase tracking-wider mb-0.5" style={{ color: s.color + "99" }}>{s.age}</p>
-                            <p className="text-xs truncate" style={{ color: "rgba(255,255,255,0.5)" }}>{picked.label}</p>
-                          </div>
-                          <span className="text-sm font-bold flex-shrink-0" style={{ color: good ? "#4ade80" : "#f87171" }}>
-                            {good ? `+${picked.impact}` : picked.impact}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-                <button onClick={handleReset}
-                  className="w-full py-3.5 rounded-full text-white font-semibold text-sm cursor-pointer transition-all active:scale-95"
-                  style={{ background: "linear-gradient(135deg, #b91c1c, #7f1d1d)", boxShadow: "0 4px 24px rgba(185,28,28,0.4), 0 0 0 1px rgba(255,255,255,0.08) inset" }}
-                  onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 4px 32px rgba(220,38,38,0.5), 0 0 0 1px rgba(255,255,255,0.12) inset")}
-                  onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 4px 24px rgba(185,28,28,0.4), 0 0 0 1px rgba(255,255,255,0.08) inset")}>
-                  ↺ Try Different Choices
-                </button>
-              </motion.div>
-            ) : (
-              <motion.div key={stageIdx} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -24 }} transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-                className="px-5 py-5 flex flex-col gap-4">
-                {/* Stage header */}
-                <div className="rounded-xl px-4 py-3.5"
-                  style={{ background: stage.bg, border: `1px solid ${stage.color}25` }}>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-bold tracking-widest uppercase" style={{ color: stage.color }}>Age {stage.age}</span>
-                    <div className="flex-1 h-px" style={{ background: `${stage.color}25` }} />
-                    <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.2)" }}>{stageIdx + 1} / {TIMELINE_STAGES.length}</span>
-                  </div>
-                  <p className="text-base font-bold text-white leading-tight" style={{ fontFamily: "'Cormorant Garamond', serif" }}>{stage.title}</p>
-                  <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>{stage.subtitle}</p>
-                </div>
-                <p className="text-[11px] uppercase tracking-widest font-bold" style={{ color: "rgba(255,255,255,0.2)" }}>Choose your path</p>
-                <div className="flex flex-col gap-2">
-                  {stage.choices.map(choice => (
-                    <TLChoiceBtn key={choice.id} choice={choice}
-                      selected={pickedId === choice.id}
-                      locked={!!pickedId && pickedId !== choice.id}
-                      onSelect={() => handlePick(choice)} />
-                  ))}
-                </div>
-                <AnimatePresence>
-                  {confirming && (
-                    <motion.button initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }}
-                      onClick={handleNext}
-                      className="w-full py-3.5 rounded-full text-white font-semibold text-sm cursor-pointer flex items-center justify-center gap-2 transition-all active:scale-95"
-                      style={{ background: "linear-gradient(135deg, #b91c1c, #7f1d1d)", boxShadow: "0 4px 24px rgba(185,28,28,0.4), 0 0 0 1px rgba(255,255,255,0.08) inset" }}
-                      onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 4px 32px rgba(220,38,38,0.5), 0 0 0 1px rgba(255,255,255,0.12) inset")}
-                      onMouseLeave={e => (e.currentTarget.style.boxShadow = "0 4px 24px rgba(185,28,28,0.4), 0 0 0 1px rgba(255,255,255,0.08) inset")}>
-                      {isLast ? "See my outcome" : `Jump to your ${TIMELINE_STAGES[stageIdx + 1]?.age}`}
-                      <ChevronRight className="w-4 h-4" />
-                    </motion.button>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Footer */}
-        <div className="px-5 py-3 flex-shrink-0" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-          <p className="text-[10px] text-center" style={{ color: "rgba(255,255,255,0.15)" }}>
-            Educational simulation only · Not a medical assessment · Click outside to close
-          </p>
-        </div>
-      </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
 
 /* ─── Page ───────────────────────────────────────────────────────── */
 
-const FEATURES_GAME = [
-  { icon: "🔥", label: "Combo multipliers" },
-  { icon: "⭐", label: "Shield power-ups" },
-  { icon: "📈", label: "Difficulty scaling" },
-];
-const FEATURES_EXPLORER = [
-  { icon: "🔍", label: "3D heart anatomy" },
-  { icon: "💡", label: "Interactive labels" },
-  { icon: "📖", label: "Health insights" },
-];
-
-const FEATURES_TIMELINE = [
-  { icon: "⏳", label: "4 life stages" },
-  { icon: "💥", label: "Compounding choices" },
-  { icon: "🫀", label: "Heart age outcome" },
-];
-
 export default function Interactables() {
   const [gameOpen, setGameOpen] = useState(false);
   const [explorerOpen, setExplorerOpen] = useState(false);
-  const [timelineOpen, setTimelineOpen] = useState(false);
   const { t } = useLanguage();
 
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        background: "#080606",
-        fontFamily: "'Outfit', sans-serif",
-      }}
-    >
-      {/* Ambient glow */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-        <div style={{
-          position: "absolute", top: "-20%", left: "50%", transform: "translateX(-50%)",
-          width: "800px", height: "600px",
-          background: "radial-gradient(ellipse, rgba(153,27,27,0.12) 0%, transparent 70%)",
-        }} />
-        <div style={{
-          position: "absolute", bottom: "10%", right: "-10%",
-          width: "400px", height: "400px",
-          background: "radial-gradient(ellipse, rgba(79,70,229,0.07) 0%, transparent 70%)",
-        }} />
-      </div>
+    <div className="min-h-screen font-['Outfit',sans-serif]" style={{ background: "#0f0c0c" }}>
 
-      {/* ── Hero ── */}
-      <div className="relative z-10 pt-20 pb-12 px-6 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-6"
-            style={{ background: "rgba(185,28,28,0.12)", border: "1px solid rgba(185,28,28,0.25)" }}>
-            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-            <span className="text-[10px] tracking-[0.2em] uppercase text-red-400 font-semibold">Interactive</span>
-          </div>
-
-          <h1
-            className="text-6xl lg:text-7xl font-bold text-white leading-[0.95] tracking-tight mb-4"
-            style={{ fontFamily: "'Cormorant Garamond', serif" }}
-          >
-            {t("int_page_title")}
-          </h1>
-
-          <p className="text-sm text-white/35 max-w-xs mx-auto leading-relaxed mt-4">
-            Learn heart health through play and exploration.
-          </p>
+      <div className="pt-16 pb-10 px-6 relative overflow-hidden text-center">
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: "radial-gradient(ellipse at 50% 110%, rgba(180,20,20,0.18), transparent 65%)" }} />
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="relative z-10">
+          <p className="text-[11px] tracking-[0.14em] uppercase text-red-400 font-medium mb-3">{t("int_page_badge")}</p>
+          <h1 className="text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight mb-3"
+            style={{ fontFamily: "'Cormorant Garamond', serif" }}>{t("int_page_title")}</h1>
+          <p className="text-sm text-white/40 max-w-md mx-auto leading-relaxed">{t("int_page_learn")}</p>
         </motion.div>
       </div>
 
-      {/* ── Divider ── */}
-      <div className="relative z-10 mx-auto max-w-sm">
-        <div className="h-px" style={{ background: "linear-gradient(to right, transparent, rgba(185,28,28,0.35), transparent)" }} />
-      </div>
+      <div className="h-px bg-gradient-to-r from-transparent via-red-900/40 to-transparent mx-8" />
 
-      {/* ── Cards ── */}
-      <div className="relative z-10 flex flex-col items-center gap-4 py-14 px-6">
+      <div className="flex flex-col items-center gap-4 py-12 px-6">
 
-        {/* Game Card */}
+        {/* Heart Defender Game */}
         <motion.button
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
           onClick={() => setGameOpen(true)}
-          className="group relative w-full max-w-sm rounded-2xl cursor-pointer text-left overflow-hidden"
-          style={{
-            background: "rgba(255,255,255,0.025)",
-            border: "1px solid rgba(255,255,255,0.07)",
-          }}
-          whileHover={{ scale: 1.015 }}
-          whileTap={{ scale: 0.985 }}
-          transition={{ duration: 0.15 }}
+          className="group flex items-center gap-5 rounded-2xl px-7 py-5 cursor-pointer transition-all w-full max-w-2xl"
+          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
+          onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.06)")}
+          onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.03)")}
         >
-          {/* Card glow on hover */}
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl"
-            style={{ background: "radial-gradient(ellipse at 30% 50%, rgba(185,28,28,0.12), transparent 70%)" }} />
-
-          <div className="relative p-5 flex items-start gap-4">
-            {/* Icon */}
-            <div className="relative flex-shrink-0">
-              <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl"
-                style={{ background: "rgba(185,28,28,0.15)", border: "1px solid rgba(185,28,28,0.25)" }}>
-                ❤️
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-sm font-bold text-white">Heart Defender</p>
-                <div className="px-2.5 py-1 rounded-full text-[10px] font-bold text-white"
-                  style={{ background: "rgba(185,28,28,0.7)", border: "1px solid rgba(220,38,38,0.4)" }}>
-                  ▶ PLAY
-                </div>
-              </div>
-              <p className="text-xs text-white/35 mb-3 leading-relaxed">
-                Catch healthy foods, dodge junk — protect your heart in this fast-paced arcade game.
-              </p>
-              <div className="flex gap-3">
-                {FEATURES_GAME.map(f => (
-                  <div key={f.label} className="flex items-center gap-1">
-                    <span className="text-xs">{f.icon}</span>
-                    <span className="text-[10px] text-white/30">{f.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+            style={{ background: "rgba(185,28,28,0.2)", border: "1px solid rgba(185,28,28,0.3)" }}>
+            <span className="text-2xl">❤️</span>
           </div>
-
-          {/* Bottom accent */}
-          <div className="h-px mx-5 mb-4" style={{ background: "linear-gradient(to right, rgba(185,28,28,0.3), transparent)" }} />
-          <div className="px-5 pb-4 flex items-center gap-4">
-            {(["easy", "medium", "hard"] as Difficulty[]).map(d => (
-              <div key={d} className="flex items-center gap-1">
-                <div className="w-1.5 h-1.5 rounded-full" style={{ background: DIFFICULTIES[d].color, opacity: 0.7 }} />
-                <span className="text-[9px] uppercase tracking-wider" style={{ color: DIFFICULTIES[d].color + "99" }}>{DIFFICULTIES[d].label}</span>
-              </div>
-            ))}
+          <div className="text-left flex-1">
+            <p className="text-sm font-semibold text-white mb-0.5">{t("int_game_name")}</p>
+            <p className="text-xs text-white/35">{t("int_game_desc")}</p>
+          </div>
+          <div className="px-4 py-2 rounded-full bg-red-700/80 text-white text-xs font-bold group-hover:bg-red-600 transition-colors flex-shrink-0">
+            {t("int_game_play")}
           </div>
         </motion.button>
 
-        {/* Explorer Card */}
+        {/* Heart Explorer */}
         <motion.button
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}
           onClick={() => setExplorerOpen(true)}
-          className="group relative w-full max-w-sm rounded-2xl cursor-pointer text-left overflow-hidden"
-          style={{
-            background: "rgba(255,255,255,0.025)",
-            border: "1px solid rgba(255,255,255,0.07)",
-          }}
-          whileHover={{ scale: 1.015 }}
-          whileTap={{ scale: 0.985 }}
-          transition={{ duration: 0.15 }}
+          className="group flex items-center gap-5 rounded-2xl px-7 py-5 cursor-pointer transition-all w-full max-w-2xl"
+          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
+          onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.06)")}
+          onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.03)")}
         >
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl"
-            style={{ background: "radial-gradient(ellipse at 30% 50%, rgba(79,70,229,0.1), transparent 70%)" }} />
-
-          <div className="relative p-5 flex items-start gap-4">
-            <div className="flex-shrink-0">
-              <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl"
-                style={{ background: "rgba(79,70,229,0.15)", border: "1px solid rgba(99,102,241,0.25)" }}>
-                🔬
-              </div>
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-sm font-bold text-white">{t("int_explorer_name")}</p>
-                <div className="px-2.5 py-1 rounded-full text-[10px] font-bold text-white"
-                  style={{ background: "rgba(79,70,229,0.65)", border: "1px solid rgba(99,102,241,0.4)" }}>
-                  {t("int_explorer_cta")}
-                </div>
-              </div>
-              <p className="text-xs text-white/35 mb-3 leading-relaxed">
-                {t("int_explorer_desc")}
-              </p>
-              <div className="flex gap-3">
-                {FEATURES_EXPLORER.map(f => (
-                  <div key={f.label} className="flex items-center gap-1">
-                    <span className="text-xs">{f.icon}</span>
-                    <span className="text-[10px] text-white/30">{f.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+            style={{ background: "rgba(28,60,185,0.2)", border: "1px solid rgba(28,60,185,0.3)" }}>
+            <span className="text-2xl">🫀</span>
           </div>
-
-          <div className="h-px mx-5 mb-3" style={{ background: "linear-gradient(to right, rgba(79,70,229,0.3), transparent)" }} />
-          <div className="px-5 pb-4 flex items-center gap-2">
-            {[
-              { label: "Anatomy", color: "rgba(99,102,241,0.18)", border: "rgba(99,102,241,0.3)", text: "rgba(165,180,252,0.7)" },
-              { label: "Education", color: "rgba(16,185,129,0.12)", border: "rgba(16,185,129,0.25)", text: "rgba(110,231,183,0.7)" },
-              { label: "Interactive", color: "rgba(251,191,36,0.1)", border: "rgba(251,191,36,0.22)", text: "rgba(251,191,36,0.6)" },
-            ].map(t => (
-              <span key={t.label} className="text-[10px] font-medium px-2 py-0.5 rounded-md"
-                style={{ background: t.color, border: `1px solid ${t.border}`, color: t.text }}>
-                {t.label}
-              </span>
-            ))}
+          <div className="text-left flex-1">
+            <p className="text-sm font-semibold text-white mb-0.5">{t("int_explorer_name")}</p>
+            <p className="text-xs text-white/35">{t("int_explorer_desc")}</p>
           </div>
-        </motion.button>
-        {/* Timeline Card */}
-        <motion.button
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          onClick={() => setTimelineOpen(true)}
-          className="group relative w-full max-w-sm rounded-2xl cursor-pointer text-left overflow-hidden"
-          style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.07)" }}
-          whileHover={{ scale: 1.015 }}
-          whileTap={{ scale: 0.985 }}
-          transition={{ duration: 0.15 }}
-        >
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl"
-            style={{ background: "radial-gradient(ellipse at 30% 50%, rgba(245,158,11,0.09), transparent 70%)" }} />
-
-          <div className="relative p-5 flex items-start gap-4">
-            <div className="flex-shrink-0">
-              <div className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl"
-                style={{ background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.22)" }}>
-                ⏳
-              </div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-sm font-bold text-white">Cardiac Timeline</p>
-                <div className="px-2.5 py-1 rounded-full text-[10px] font-bold text-white"
-                  style={{ background: "rgba(245,158,11,0.55)", border: "1px solid rgba(245,158,11,0.35)" }}>
-                  ▶ START
-                </div>
-              </div>
-              <p className="text-xs text-white/35 mb-3 leading-relaxed">
-                Make lifestyle choices across four decades of life and see how they shape your heart's age.
-              </p>
-              <div className="flex gap-3">
-                {FEATURES_TIMELINE.map(f => (
-                  <div key={f.label} className="flex items-center gap-1">
-                    <span className="text-xs">{f.icon}</span>
-                    <span className="text-[10px] text-white/30">{f.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="h-px mx-5 mb-3" style={{ background: "linear-gradient(to right, rgba(245,158,11,0.25), transparent)" }} />
-          <div className="px-5 pb-4 flex items-center gap-2">
-            {["20s", "30s", "40s", "50s"].map((age, i) => (
-              <div key={age} className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full" style={{ background: ["#60a5fa","#f59e0b","#f97316","#e24b4a"][i], opacity: 0.7 }} />
-                <span className="text-[9px] uppercase tracking-wider" style={{ color: ["#60a5fa","#f59e0b","#f97316","#e24b4a"][i] + "99" }}>{age}</span>
-              </div>
-            ))}
+          <div className="px-4 py-2 rounded-full text-white text-xs font-bold transition-colors flex-shrink-0"
+            style={{ background: "rgba(79,70,229,0.8)" }}
+            onMouseEnter={e => (e.currentTarget.style.background = "rgba(99,102,241,0.9)")}
+            onMouseLeave={e => (e.currentTarget.style.background = "rgba(79,70,229,0.8)")}>
+            {t("int_explorer_cta")}
           </div>
         </motion.button>
 
+        <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent w-full max-w-2xl my-2" />
+
+        {/* Blood Pressure Checker */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }} className="w-full max-w-2xl">
+          <ToolCard
+            icon="🩺"
+            title={t("int_bp_title")}
+            desc={t("int_bp_desc")}
+            color="#ef4444"
+            borderColor="rgba(239,68,68,0.3)"
+          >
+            <BPChecker />
+          </ToolCard>
+        </motion.div>
+
+        {/* Heart Rate Zone Calculator */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }} className="w-full max-w-2xl">
+          <ToolCard
+            icon="💓"
+            title={t("int_hr_title")}
+            desc={t("int_hr_desc")}
+            color="#f59e0b"
+            borderColor="rgba(245,158,11,0.3)"
+          >
+            <HRCalculator />
+          </ToolCard>
+        </motion.div>
+
+        {/* Myth vs Fact */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.5 }} className="w-full max-w-2xl">
+          <ToolCard
+            icon="🧠"
+            title={t("int_myth_title")}
+            desc={t("int_myth_desc")}
+            color="#8b5cf6"
+            borderColor="rgba(139,92,246,0.3)"
+          >
+            <MythFact />
+          </ToolCard>
+        </motion.div>
       </div>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.4 }}
-        className="relative z-10 mx-auto max-w-sm mb-16 mx-6 rounded-xl px-5 py-3.5 flex items-start gap-3"
-        style={{ background: "rgba(120,80,0,0.12)", border: "1px solid rgba(180,120,0,0.18)" }}
-      >
-        <span className="text-sm mt-0.5 flex-shrink-0">⚠️</span>
-        <p className="text-[11px] leading-relaxed" style={{ color: "rgba(251,191,36,0.45)" }}>
-          For educational purposes only. Always consult a qualified healthcare provider for medical advice.
-        </p>
-      </motion.div>
+
+      <div className="mx-6 mb-12 max-w-2xl mx-auto rounded-2xl bg-amber-950/30 border border-amber-700/25 px-5 py-3.5 flex items-start gap-2.5">
+        <span className="text-sm mt-0.5">⚠️</span>
+        <p className="text-xs text-amber-200/50 leading-relaxed">{t("int_disclaimer")}</p>
+      </div>
 
       <AnimatePresence>
         {gameOpen && <GameModal onClose={() => setGameOpen(false)} />}
       </AnimatePresence>
       <AnimatePresence>
         {explorerOpen && <HeartExplorerModal onClose={() => setExplorerOpen(false)} />}
-      </AnimatePresence>
-      <AnimatePresence>
-        {timelineOpen && <CardiacTimelineModal onClose={() => setTimelineOpen(false)} />}
       </AnimatePresence>
     </div>
   );

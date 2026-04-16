@@ -13,6 +13,7 @@ import RiskAssessment from "@/pages/risk-assessment";
 import Resources from "@/pages/resources";
 import About from "@/pages/about";
 import Interactables from "@/pages/interactables";
+import Suggestions from "@/pages/suggestions";
 import AdminPage from "@/pages/admin/index";
 import ArticleFormPage from "@/pages/admin/articles/form";
 
@@ -29,6 +30,7 @@ function Router() {
         <Route path="/resources" component={Resources} />
         <Route path="/about" component={About} />
         <Route path="/interactables" component={Interactables} />
+        <Route path="/suggestions" component={Suggestions} />
         <Route path="/admin" component={AdminPage} />
         <Route path="/admin/articles/new" component={ArticleFormPage} />
         <Route path="/admin/articles/edit/:id" component={ArticleFormPage} />

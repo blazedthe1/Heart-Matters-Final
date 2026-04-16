@@ -340,6 +340,42 @@ export const T: Record<string, Record<LangCode, string>> = {
   int_explorer_desc: { en:"Click regions to learn anatomy", es:"Clic para explorar la anatomía", hi:"क्षेत्र क्लिक करके शरीर रचना जानें", ml:"ഭാഗങ്ങൾ ക്ലിക്ക് ചെയ്ത് ഘടന മനസ്സിലാക്കൂ", fr:"Cliquez pour explorer l'anatomie", ar:"انقر لاستكشاف تشريح القلب" },
   int_explorer_cta:  { en:"🔍 Explore", es:"🔍 Explorar", hi:"🔍 जानें", ml:"🔍 ജ്ഞാനം", fr:"🔍 Explorer", ar:"🔍 استكشف" },
 
+  /* ── Interactables misc ─────────────────────────────────────────── */
+  int_game_name:        { en:"Heart Defender", es:"Defensor del Corazón", hi:"हार्ट डिफेंडर", ml:"ഹൃദ്‌ ഡിഫൻഡർ", fr:"Défenseur du Cœur", ar:"مدافع القلب" },
+  int_game_desc:        { en:"Combos · Power-ups · Difficulty levels", es:"Combos · Potenciadores · Niveles de dificultad", hi:"कॉम्बो · पावर-अप · कठिनाई स्तर", ml:"കോംബോ · പവർ-അപ് · ബുദ്ധിമുട്ട് ലെവലുകൾ", fr:"Combos · Bonus · Niveaux de difficulté", ar:"تحديات · مكافآت · مستويات صعوبة" },
+  int_game_play:        { en:"▶ Play", es:"▶ Jugar", hi:"▶ खेलें", ml:"▶ കളിക്കൂ", fr:"▶ Jouer", ar:"▶ العب" },
+  int_disclaimer:       { en:"These tools are for educational purposes only. Always consult a qualified healthcare provider for medical advice.", es:"Estas herramientas son solo con fines educativos. Siempre consulta a un profesional de la salud.", hi:"ये उपकरण केवल शैक्षिक उद्देश्यों के लिए हैं। चिकित्सा सलाह के लिए हमेशा डॉक्टर से परामर्श करें।", ml:"ഈ ഉപകരണങ്ങൾ വിദ്യാഭ്യാസ ആവശ്യങ്ങൾക്ക് മാത്രം. ഡോക്ടറോടു ചോദിക്കൂ.", fr:"Ces outils sont à des fins éducatives uniquement. Consultez toujours un professionnel de santé.", ar:"هذه الأدوات لأغراض تعليمية فقط. استشر دائماً مقدم رعاية صحية متخصصاً." },
+  int_page_learn:       { en:"Learn heart health through play and exploration.", es:"Aprende sobre salud cardíaca a través del juego y la exploración.", hi:"खेल और अन्वेषण के माध्यम से हृदय स्वास्थ्य सीखें।", ml:"കളിയും ഗവേഷണവും ഉപയോഗിച്ച് ഹൃദ്‌ആരോഗ്യം പഠിക്കൂ.", fr:"Apprenez la santé cardiaque par le jeu et l'exploration.", ar:"تعلم صحة القلب من خلال اللعب والاستكشاف." },
+  int_reset:            { en:"Reset", es:"Reiniciar", hi:"रीसेट", ml:"റീസെറ്റ്", fr:"Réinitialiser", ar:"إعادة تعيين" },
+
+  /* ── Suggestions page ───────────────────────────────────────────── */
+  nav_suggestions:      { en:"Suggestions", es:"Sugerencias", hi:"सुझाव", ml:"നിർദ്ദേശങ്ങൾ", fr:"Suggestions", ar:"اقتراحات" },
+  sug_badge:            { en:"Your Voice", es:"Tu voz", hi:"आपकी आवाज़", ml:"നിങ്ങളുടെ ശബ്ദം", fr:"Votre voix", ar:"صوتك" },
+  sug_title:            { en:"Share your\nsuggestions.", es:"Comparte tus\nsugerencias.", hi:"अपने सुझाव\nशेयर करें।", ml:"നിങ്ങളുടെ നിർദ്ദേശങ്ങൾ\nപങ്കിടൂ.", fr:"Partagez vos\nsuggestions.", ar:"شارك\naقتراحاتك." },
+  sug_sub:              { en:"Have an idea to improve Heart Matters? Spotted something we got wrong? We genuinely want to hear from you.", es:"¿Tienes una idea para mejorar Heart Matters? Cuéntanos, queremos escucharte.", hi:"क्या Heart Matters को बेहतर बनाने का कोई विचार है? हम आपसे सुनना चाहते हैं।", ml:"Heart Matters മെച്ചപ്പെടുത്താൻ ഒരു ആശയം ഉണ്ടോ? ഞങ്ങൾ നിങ്ങളിൽ നിന്ന് കേൾക്കാൻ ആഗ്രഹിക്കുന്നു.", fr:"Vous avez une idée pour améliorer Heart Matters? Nous voulons vraiment l'entendre.", ar:"هل لديك فكرة لتحسين Heart Matters؟ نريد الاستماع إليك." },
+  sug_name_label:       { en:"Your Name", es:"Tu nombre", hi:"आपका नाम", ml:"നിങ്ങളുടെ പേര്", fr:"Votre nom", ar:"اسمك" },
+  sug_name_ph:          { en:"e.g. Sarah Johnson", es:"ej. María García", hi:"उदा. राहुल शर्मा", ml:"ഉദാ. Rahul Sharma", fr:"ex. Jean Dupont", ar:"مثال: سارة أحمد" },
+  sug_type_label:       { en:"Type of Suggestion", es:"Tipo de sugerencia", hi:"सुझाव का प्रकार", ml:"നിർദ്ദേശത്തിന്റെ തരം", fr:"Type de suggestion", ar:"نوع الاقتراح" },
+  sug_type_content:     { en:"Content / Article Idea", es:"Contenido / Idea de artículo", hi:"सामग्री / लेख विचार", ml:"ഉള്ളടക്കം / ലേഖന ആശയം", fr:"Contenu / Idée d'article", ar:"محتوى / فكرة مقال" },
+  sug_type_feature:     { en:"Feature Request", es:"Solicitud de función", hi:"फीचर अनुरोध", ml:"ഫീച്ചർ അഭ്യർത്ഥന", fr:"Demande de fonctionnalité", ar:"طلب ميزة" },
+  sug_type_bug:         { en:"Bug / Error Report", es:"Informe de error", hi:"बग / त्रुटि रिपोर्ट", ml:"ബഗ് / പിശക് റിപ്പോർട്ട്", fr:"Rapport de bug / erreur", ar:"تقرير خطأ" },
+  sug_type_general:     { en:"General Feedback", es:"Comentarios generales", hi:"सामान्य प्रतिक्रिया", ml:"പൊതുവായ ഫീഡ്‌ബാക്ക്", fr:"Retour général", ar:"ملاحظات عامة" },
+  sug_msg_label:        { en:"Your Suggestion", es:"Tu sugerencia", hi:"आपका सुझाव", ml:"നിങ്ങളുടെ നിർദ്ദേശം", fr:"Votre suggestion", ar:"اقتراحك" },
+  sug_msg_ph:           { en:"Tell us your idea, feedback, or anything you'd like to see improved...", es:"Cuéntanos tu idea, comentario o lo que te gustaría ver mejorado...", hi:"हमें अपना विचार, प्रतिक्रिया, या जो आप सुधारना चाहते हैं वह बताएं...", ml:"നിങ്ങളുടെ ആശയം, ഫീഡ്‌ബാക്ക്, അല്ലെങ്കിൽ മെച്ചപ്പെടുത്തണമെന്ന് ആഗ്രഹിക്കുന്നത് ഞങ്ങളോട് പറയൂ...", fr:"Dites-nous votre idée, vos commentaires ou ce que vous aimeriez voir amélioré...", ar:"أخبرنا بفكرتك أو ملاحظاتك أو أي شيء تود تحسينه..." },
+  sug_send:             { en:"Send Suggestion", es:"Enviar sugerencia", hi:"सुझाव भेजें", ml:"നിർദ്ദേശം അയക്കൂ", fr:"Envoyer la suggestion", ar:"إرسال الاقتراح" },
+  sug_or_email:         { en:"Or email us directly", es:"O envíanos un correo directamente", hi:"या हमें सीधे ईमेल करें", ml:"അല്ലെങ്കിൽ നേരിട്ട് ഇമെയിൽ ചെയ്യൂ", fr:"Ou envoyez-nous un email directement", ar:"أو راسلنا مباشرةً عبر البريد الإلكتروني" },
+  sug_types_title:      { en:"What kind of suggestions do we welcome?", es:"¿Qué tipo de sugerencias recibimos?", hi:"हम किस प्रकार के सुझावों का स्वागत करते हैं?", ml:"ഞങ്ങൾ ഏത് തരം നിർദ്ദേശങ്ങളെ സ്വാഗതം ചെയ്യുന്നു?", fr:"Quel type de suggestions accueillons-nous?", ar:"ما أنواع الاقتراحات التي نرحب بها؟" },
+  sug_cat1:             { en:"Article topics you'd like to see covered", es:"Temas de artículos que te gustaría ver", hi:"लेख विषय जो आप देखना चाहते हैं", ml:"കാണണമെന്ന് ആഗ്രഹിക്കുന്ന ലേഖന വിഷയങ്ങൾ", fr:"Sujets d'articles que vous aimeriez voir traités", ar:"موضوعات المقالات التي تود رؤيتها" },
+  sug_cat2:             { en:"Improvements to our interactive tools", es:"Mejoras a nuestras herramientas interactivas", hi:"हमारे इंटरएक्टिव उपकरणों में सुधार", ml:"ഞങ്ങളുടെ ഇന്ററാക്ടീവ് ടൂളുകൾ മെച്ചപ്പെടുത്തൽ", fr:"Améliorations de nos outils interactifs", ar:"تحسينات على أدواتنا التفاعلية" },
+  sug_cat3:             { en:"Corrections to any medical information", es:"Correcciones a información médica", hi:"किसी भी चिकित्सा जानकारी में सुधार", ml:"ഏതെങ്കിലും വൈദ്യ വിവരങ്ങൾ തിരുത്തൽ", fr:"Corrections d'informations médicales", ar:"تصحيحات لأي معلومات طبية" },
+  sug_cat4:             { en:"Website design and user experience ideas", es:"Ideas de diseño y experiencia de usuario", hi:"वेबसाइट डिज़ाइन और उपयोगकर्ता अनुभव विचार", ml:"വെബ്സൈറ്റ് ഡിസൈൻ, ഉപയോക്തൃ അനുഭവ ആശയങ്ങൾ", fr:"Idées de design et d'expérience utilisateur", ar:"أفكار تصميم الموقع وتجربة المستخدم" },
+
+  /* ── Back to top ────────────────────────────────────────────────── */
+  back_to_top:          { en:"Back to top", es:"Volver arriba", hi:"शीर्ष पर जाएं", ml:"മുകളിലേക്ക് പോകൂ", fr:"Retour en haut", ar:"العودة للأعلى" },
+
+  /* ── Nav interactables ──────────────────────────────────────────── */
+  nav_interactables:    { en:"Interactables", es:"Interactivos", hi:"इंटरएक्टिव्स", ml:"ഇന്ററാക്ടബിൾസ്", fr:"Interactifs", ar:"التفاعليات" },
+
   /* ── Footer ─────────────────────────────────────────────────────── */
   footer_initiative:{ en:"A Student-Led Initiative",   es:"Una Iniciativa Estudiantil",  hi:"एक छात्र-नेतृत्व पहल",    ml:"ഒരു വിദ്യാർഥി-നേതൃത്വ മുൻകൈ",  fr:"Une Initiative Étudiante",   ar:"مبادرة طلابية" },
   footer_desc:    { en:"A student-driven cardiovascular health awareness platform from Rajagiri Public School — clear, compassionate, and evidence-based.", es:"Una plataforma estudiantil de concientización sobre salud cardiovascular de Rajagiri.", hi:"राजगिरी पब्लिक स्कूल से एक छात्र-संचालित हृदय स्वास्थ्य जागरूकता प्लेटफॉर्म।", ml:"ഹൃദ്രോഗ ആരോഗ്യ ബോധവൽക്കരണ പ്ലാറ്റ്ഫോം, രാജഗിരി പബ്ലിക് സ്കൂൾ.", fr:"Une plateforme de sensibilisation à la santé cardiovasculaire de Rajagiri.", ar:"منصة طلابية للتوعية بصحة القلب من مدرسة راجاجيري العامة." },
