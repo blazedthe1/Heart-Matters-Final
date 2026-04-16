@@ -260,7 +260,7 @@ function IdlePanel() {
         />
         <div className="relative w-14 h-14 rounded-2xl flex items-center justify-center text-2xl"
           style={{ background: "rgba(185,28,28,0.15)", border: "1px solid rgba(185,28,28,0.25)" }}>
-          🫀
+          🔬
         </div>
       </div>
 

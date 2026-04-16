@@ -519,64 +519,66 @@ function GameModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+
 /* ─── Blood Pressure Checker ─────────────────────────────────────── */
 
-function getBPCategory(sys: number, dia: number, t: (k: string) => string) {
-  if (sys >= 180 || dia >= 120) return { key: "crisis",  color: "#7f1d1d", border: "#991b1b", text: "#fca5a5", label: t("int_bp_crisis"),  desc: t("int_bp_crisis_desc"),  icon: "🚨" };
-  if (sys >= 140 || dia >= 90)  return { key: "high2",   color: "#7f1d1d", border: "#b91c1c", text: "#fca5a5", label: t("int_bp_high2"),   desc: t("int_bp_high2_desc"),   icon: "⚠️" };
-  if (sys >= 130 || dia >= 80)  return { key: "high1",   color: "#431407", border: "#c2410c", text: "#fdba74", label: t("int_bp_high1"),   desc: t("int_bp_high1_desc"),   icon: "⚠️" };
-  if (sys >= 120 && dia < 80)   return { key: "elevated",color: "#1c1917", border: "#92400e", text: "#fcd34d", label: t("int_bp_elevated"), desc: t("int_bp_elevated_desc"), icon: "📊" };
-  return                               { key: "normal",  color: "#052e16", border: "#166534", text: "#86efac", label: t("int_bp_normal"),   desc: t("int_bp_normal_desc"),   icon: "✅" };
+const BP_CATEGORIES = [
+  { sysMax: 120, diaMax: 80,  key: "int_bp_normal",   descKey: "int_bp_normal_desc",   color: "#22c55e", icon: "✅" },
+  { sysMax: 129, diaMax: 80,  key: "int_bp_elevated",  descKey: "int_bp_elevated_desc",  color: "#f59e0b", icon: "⚠️" },
+  { sysMax: 139, diaMax: 89,  key: "int_bp_high1",     descKey: "int_bp_high1_desc",     color: "#f97316", icon: "🔶" },
+  { sysMax: 179, diaMax: 119, key: "int_bp_high2",     descKey: "int_bp_high2_desc",     color: "#ef4444", icon: "🔴" },
+  { sysMax: 999, diaMax: 999, key: "int_bp_crisis",    descKey: "int_bp_crisis_desc",    color: "#dc2626", icon: "🚨" },
+] as const;
+
+function getBPCategory(sys: number, dia: number) {
+  if (sys < 120 && dia < 80) return BP_CATEGORIES[0];
+  if (sys <= 129 && dia < 80) return BP_CATEGORIES[1];
+  if (sys <= 139 || dia <= 89) return BP_CATEGORIES[2];
+  if (sys <= 179 || dia <= 119) return BP_CATEGORIES[3];
+  return BP_CATEGORIES[4];
 }
 
 function BPChecker() {
   const { t } = useLanguage();
   const [sys, setSys] = useState("");
   const [dia, setDia] = useState("");
-  const [result, setResult] = useState<ReturnType<typeof getBPCategory> | null>(null);
+  const [result, setResult] = useState<typeof BP_CATEGORIES[number] | null>(null);
   const [error, setError] = useState("");
 
   const check = () => {
     const s = parseInt(sys), d = parseInt(dia);
     if (isNaN(s) || isNaN(d) || s < 60 || s > 250 || d < 40 || d > 150) {
-      setError("Please enter valid readings (systolic 60-250, diastolic 40-150).");
+      setError("Please enter valid readings (systolic 60–250, diastolic 40–150).");
       setResult(null);
       return;
     }
     setError("");
-    setResult(getBPCategory(s, d, t));
+    setResult(getBPCategory(s, d));
   };
 
   const reset = () => { setSys(""); setDia(""); setResult(null); setError(""); };
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-[11px] uppercase tracking-widest text-white/40 mb-2 font-medium">{t("int_bp_systolic")}</label>
-          <input
-            type="number" value={sys} onChange={e => setSys(e.target.value)}
-            placeholder="e.g. 120" min={60} max={250}
-            className="w-full rounded-xl px-4 py-3 text-white text-lg font-semibold outline-none transition-all"
-            style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}
-            onFocus={e => (e.currentTarget.style.borderColor = "rgba(239,68,68,0.6)")}
-            onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)")}
-          />
-        </div>
-        <div>
-          <label className="block text-[11px] uppercase tracking-widest text-white/40 mb-2 font-medium">{t("int_bp_diastolic")}</label>
-          <input
-            type="number" value={dia} onChange={e => setDia(e.target.value)}
-            placeholder="e.g. 80" min={40} max={150}
-            className="w-full rounded-xl px-4 py-3 text-white text-lg font-semibold outline-none transition-all"
-            style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}
-            onFocus={e => (e.currentTarget.style.borderColor = "rgba(239,68,68,0.6)")}
-            onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)")}
-          />
-        </div>
+      <div className="grid grid-cols-2 gap-3">
+        {[
+          { label: t("int_bp_systolic"), val: sys, set: setSys, ph: "e.g. 120" },
+          { label: t("int_bp_diastolic"), val: dia, set: setDia, ph: "e.g. 80" },
+        ].map(({ label, val, set, ph }) => (
+          <div key={label}>
+            <label className="block text-[11px] uppercase tracking-widest text-white/40 mb-2 font-medium">{label}</label>
+            <input
+              type="number" value={val} placeholder={ph}
+              onChange={e => set(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && check()}
+              className="w-full rounded-xl px-4 py-3 text-white text-lg font-semibold outline-none transition-all"
+              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}
+              onFocus={e => (e.currentTarget.style.borderColor = "rgba(239,68,68,0.6)")}
+              onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)")}
+            />
+          </div>
+        ))}
       </div>
-
-      {error && <p className="text-red-400 text-xs bg-red-950/40 border border-red-800/40 rounded-lg px-4 py-2">{error}</p>}
 
       <div className="flex gap-3">
         <button
@@ -596,53 +598,50 @@ function BPChecker() {
         )}
       </div>
 
+      {error && <p className="text-red-400 text-xs bg-red-950/40 border border-red-800/40 rounded-lg px-4 py-2">{error}</p>}
+
       <AnimatePresence>
         {result && (
           <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6 }}
-            className="rounded-2xl p-5 space-y-2"
-            style={{ background: result.color, border: `1px solid ${result.border}` }}
+            key={result.key}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="rounded-xl px-5 py-4 space-y-2"
+            style={{ background: `${result.color}14`, border: `1px solid ${result.color}40` }}
           >
             <div className="flex items-center gap-3">
               <span className="text-2xl">{result.icon}</span>
               <div>
-                <p className="text-[10px] uppercase tracking-widest text-white/40 font-medium mb-0.5">Result</p>
-                <p className="text-xl font-bold" style={{ color: result.text }}>{result.label}</p>
-              </div>
-              <div className="ml-auto text-right">
-                <p className="text-2xl font-bold text-white">{sys}/{dia}</p>
-                <p className="text-[10px] text-white/30 uppercase tracking-widest">mmHg</p>
+                <p className="text-[10px] uppercase tracking-widest font-medium" style={{ color: result.color }}>
+                  {sys}/{dia} mmHg
+                </p>
+                <p className="text-lg font-bold text-white">{t(result.key)}</p>
               </div>
             </div>
-            <p className="text-sm leading-relaxed" style={{ color: result.text + "bb" }}>{result.desc}</p>
+            <p className="text-sm text-white/60 leading-relaxed">{t(result.descKey)}</p>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Reference chart */}
-      <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.07)" }}>
-        <div className="px-4 py-2.5 border-b" style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.03)" }}>
+      <div className="rounded-xl overflow-hidden border border-white/[0.06]">
+        <div className="px-4 py-2.5 bg-white/[0.04] border-b border-white/[0.06]">
           <p className="text-[10px] uppercase tracking-widest text-white/30 font-medium">Reference Chart</p>
         </div>
-        {[
-          { range: "< 120 / < 80", label: t("int_bp_normal"),   color: "#22c55e" },
-          { range: "120-129 / < 80", label: t("int_bp_elevated"), color: "#eab308" },
-          { range: "130-139 / 80-89", label: t("int_bp_high1"),  color: "#f97316" },
-          { range: "≥ 140 / ≥ 90", label: t("int_bp_high2"),    color: "#ef4444" },
-          { range: "≥ 180 / ≥ 120", label: t("int_bp_crisis"),  color: "#dc2626" },
-        ].map((row, i) => (
-          <div key={i} className="flex items-center justify-between px-4 py-2.5"
-            style={{ borderBottom: i < 4 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
-            <span className="text-xs font-mono text-white/40">{row.range}</span>
-            <span className="text-xs font-semibold" style={{ color: row.color }}>{row.label}</span>
+        {BP_CATEGORIES.map((cat) => (
+          <div key={cat.key} className="flex items-center justify-between px-4 py-2 border-b border-white/[0.04] last:border-0">
+            <div className="flex items-center gap-2.5">
+              <span className="text-sm">{cat.icon}</span>
+              <span className="text-xs font-medium" style={{ color: cat.color }}>{t(cat.key)}</span>
+            </div>
           </div>
         ))}
       </div>
     </div>
   );
 }
+
 
 /* ─── Heart Rate Zone Calculator ─────────────────────────────────── */
 
