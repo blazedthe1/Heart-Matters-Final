@@ -249,7 +249,7 @@ export function CPRGameModal({ onClose }: Props) {
                   className="w-20 h-20 rounded-2xl flex items-center justify-center"
                   style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)" }}
                 >
-                  <span className="text-4xl">🫀</span>
+                  <span className="text-4xl">⛑</span>
                 </motion.div>
                 <div>
                   <h2 className="text-2xl font-bold text-white mb-1.5" style={{ fontFamily: "'Cormorant Garamond', serif" }}>CPR Rush</h2>
@@ -356,25 +356,54 @@ export function CPRGameModal({ onClose }: Props) {
                 {/* Big press button */}
                 <motion.button
                   animate={pressEffect
-                    ? { scale: [1, 0.88, 1.04, 1], boxShadow: ["0 0 0px rgba(239,68,68,0)", "0 0 32px rgba(239,68,68,0.6)", "0 0 0px rgba(239,68,68,0)"] }
+                    ? { scale: [1, 0.91, 1.03, 1], boxShadow: ["0 0 0px rgba(239,68,68,0)", "0 0 40px rgba(239,68,68,0.55)", "0 0 0px rgba(239,68,68,0)"] }
                     : beatActive
-                    ? { boxShadow: ["0 0 0px rgba(239,68,68,0)", "0 0 18px rgba(239,68,68,0.35)", "0 0 0px rgba(239,68,68,0)"] }
+                    ? { boxShadow: ["0 0 0px rgba(239,68,68,0)", "0 0 20px rgba(239,68,68,0.3)", "0 0 0px rgba(239,68,68,0)"] }
                     : {}}
-                  transition={{ duration: 0.18 }}
+                  transition={{ duration: 0.16 }}
                   onClick={handleCompression}
-                  className="w-full py-12 rounded-2xl flex flex-col items-center gap-2 cursor-pointer transition-colors active:scale-95"
-                  style={{ background: "rgba(185,28,28,0.12)", border: "2px solid rgba(185,28,28,0.35)" }}
-                  onMouseEnter={e => (e.currentTarget.style.background = "rgba(185,28,28,0.2)")}
-                  onMouseLeave={e => (e.currentTarget.style.background = "rgba(185,28,28,0.12)")}
+                  className="w-full py-8 rounded-2xl flex flex-col items-center gap-3 cursor-pointer"
+                  style={{ background: "rgba(185,28,28,0.1)", border: "2px solid rgba(185,28,28,0.3)" }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "rgba(185,28,28,0.18)")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "rgba(185,28,28,0.1)")}
                 >
-                  <motion.span
-                    animate={pressEffect ? { scale: [1, 0.8, 1.1, 1] } : {}}
-                    transition={{ duration: 0.18 }}
-                    className="text-5xl"
-                  >
-                    👐
-                  </motion.span>
-                  <p className="text-white/50 text-xs font-medium">Press to compress</p>
+                  {/* Compression target rings */}
+                  <div className="relative flex items-center justify-center" style={{ width: 96, height: 96 }}>
+                    {/* Outermost pulse ring */}
+                    <motion.div
+                      animate={beatActive ? { scale: [1, 1.35, 1], opacity: [0.2, 0.6, 0.2] } : { opacity: 0.2 }}
+                      transition={{ duration: 0.22 }}
+                      className="absolute inset-0 rounded-full"
+                      style={{ border: "2px solid rgba(239,68,68,0.7)" }}
+                    />
+                    {/* Middle ring */}
+                    <motion.div
+                      animate={pressEffect ? { scale: [1, 0.72, 1.08, 1] } : {}}
+                      transition={{ duration: 0.18 }}
+                      className="absolute rounded-full"
+                      style={{ width: 68, height: 68, border: "2px solid rgba(239,68,68,0.55)", background: "rgba(185,28,28,0.08)" }}
+                    />
+                    {/* Inner core */}
+                    <motion.div
+                      animate={pressEffect
+                        ? { scale: [1, 0.6, 1.1, 1], background: ["rgba(185,28,28,0.3)", "rgba(239,68,68,0.75)", "rgba(185,28,28,0.3)"] }
+                        : beatActive
+                        ? { background: ["rgba(185,28,28,0.25)", "rgba(239,68,68,0.45)", "rgba(185,28,28,0.25)"] }
+                        : {}}
+                      transition={{ duration: 0.18 }}
+                      className="relative rounded-full flex items-center justify-center"
+                      style={{ width: 44, height: 44, background: "rgba(185,28,28,0.25)", border: "2px solid rgba(239,68,68,0.6)" }}
+                    >
+                      {/* SVG hand icon */}
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0" />
+                        <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2" />
+                        <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8" />
+                        <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
+                      </svg>
+                    </motion.div>
+                  </div>
+                  <p className="text-white/45 text-xs font-semibold tracking-widest uppercase">Press to compress</p>
                 </motion.button>
               </motion.div>
             )}

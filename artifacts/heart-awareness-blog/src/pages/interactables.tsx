@@ -32,12 +32,12 @@ export default function Interactables() {
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="md:col-span-2 lg:row-span-2">
             <button
               onClick={() => setExplorerOpen(true)}
-              className="group w-full h-full min-h-[280px] rounded-2xl p-6 flex flex-col justify-between cursor-pointer transition-all text-left"
+              className="group w-full h-full min-h-[280px] rounded-2xl p-6 flex flex-col cursor-pointer transition-all text-left overflow-hidden relative"
               style={{ background: "rgba(79,70,229,0.08)", border: "1px solid rgba(79,70,229,0.2)" }}
               onMouseEnter={e => (e.currentTarget.style.background = "rgba(79,70,229,0.14)")}
               onMouseLeave={e => (e.currentTarget.style.background = "rgba(79,70,229,0.08)")}
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start justify-between gap-4 relative z-10">
                 <div>
                   <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(79,70,229,0.2)", border: "1px solid rgba(79,70,229,0.35)" }}>
                     <span className="text-3xl">🔬</span>
@@ -47,6 +47,68 @@ export default function Interactables() {
                   <p className="text-sm text-white/40 leading-relaxed max-w-md">{t("int_explorer_desc")}</p>
                 </div>
                 <span className="px-3 py-1.5 rounded-lg text-xs font-semibold text-indigo-300 group-hover:bg-indigo-800/60 transition-colors flex-shrink-0" style={{ background: "rgba(79,70,229,0.2)" }}>{t("int_explorer_cta")} →</span>
+              </div>
+
+              {/* Anatomy preview illustration */}
+              <div className="flex-1 flex items-end justify-center pt-4 relative z-10">
+                <motion.div
+                  animate={{ scale: [1, 1.025, 1] }}
+                  transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
+                  className="relative"
+                >
+                  <svg width="260" height="200" viewBox="0 0 260 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-70">
+                    {/* Outer heart shape */}
+                    <path d="M130 185 C90 162, 20 130, 12 78 C8 50, 22 22, 50 18 C68 14, 90 24, 105 44 C112 34, 122 18, 130 14 C138 18, 148 34, 155 44 C170 24, 192 14, 210 18 C238 22, 252 50, 248 78 C240 130, 170 162, 130 185Z" stroke="rgba(129,140,248,0.5)" strokeWidth="1.5" fill="rgba(79,70,229,0.07)" />
+                    {/* Septum divider */}
+                    <line x1="130" y1="38" x2="130" y2="158" stroke="rgba(129,140,248,0.25)" strokeWidth="1" strokeDasharray="4 3" />
+                    <line x1="72" y1="100" x2="188" y2="100" stroke="rgba(129,140,248,0.2)" strokeWidth="1" strokeDasharray="4 3" />
+                    {/* Left Atrium */}
+                    <ellipse cx="90" cy="68" rx="30" ry="24" stroke="rgba(167,139,250,0.55)" strokeWidth="1.2" fill="rgba(99,102,241,0.1)" />
+                    {/* Right Atrium */}
+                    <ellipse cx="170" cy="68" rx="30" ry="24" stroke="rgba(167,139,250,0.55)" strokeWidth="1.2" fill="rgba(99,102,241,0.1)" />
+                    {/* Left Ventricle */}
+                    <path d="M62 100 Q68 138, 130 175 Q118 138, 118 100 Z" stroke="rgba(129,140,248,0.55)" strokeWidth="1.2" fill="rgba(79,70,229,0.13)" />
+                    {/* Right Ventricle */}
+                    <path d="M198 100 Q192 138, 130 175 Q142 138, 142 100 Z" stroke="rgba(129,140,248,0.55)" strokeWidth="1.2" fill="rgba(79,70,229,0.13)" />
+                    {/* Aortic arch */}
+                    <path d="M105 52 C98 28, 80 15, 95 10 C112 5, 128 20, 130 38" stroke="rgba(167,139,250,0.7)" strokeWidth="2" fill="none" />
+                    {/* Pulmonary artery */}
+                    <path d="M155 52 C162 28, 180 15, 165 10 C148 5, 132 20, 130 38" stroke="rgba(129,140,248,0.5)" strokeWidth="1.5" fill="none" />
+                    {/* Atrioventricular valves - small circles */}
+                    <circle cx="90" cy="100" r="5" stroke="rgba(167,139,250,0.6)" strokeWidth="1" fill="rgba(99,102,241,0.2)" />
+                    <circle cx="170" cy="100" r="5" stroke="rgba(167,139,250,0.6)" strokeWidth="1" fill="rgba(99,102,241,0.2)" />
+                    {/* Labels */}
+                    <text x="62" y="63" fill="rgba(167,139,250,0.75)" fontSize="9" fontFamily="Outfit, sans-serif" fontWeight="600">LA</text>
+                    <text x="174" y="63" fill="rgba(167,139,250,0.75)" fontSize="9" fontFamily="Outfit, sans-serif" fontWeight="600">RA</text>
+                    <text x="72" y="140" fill="rgba(129,140,248,0.65)" fontSize="9" fontFamily="Outfit, sans-serif" fontWeight="600">LV</text>
+                    <text x="172" y="140" fill="rgba(129,140,248,0.65)" fontSize="9" fontFamily="Outfit, sans-serif" fontWeight="600">RV</text>
+                    <text x="82" y="9" fill="rgba(196,181,253,0.65)" fontSize="8" fontFamily="Outfit, sans-serif">Aorta</text>
+                    <text x="148" y="9" fill="rgba(167,139,250,0.55)" fontSize="8" fontFamily="Outfit, sans-serif">PA</text>
+                    {/* Glow radial behind heart */}
+                    <ellipse cx="130" cy="100" rx="90" ry="70" fill="url(#heartGlow)" />
+                    <defs>
+                      <radialGradient id="heartGlow" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="rgba(99,102,241,0.08)" />
+                        <stop offset="100%" stopColor="rgba(99,102,241,0)" />
+                      </radialGradient>
+                    </defs>
+                  </svg>
+                  {/* Floating chamber dots */}
+                  {[
+                    { cx: 90, cy: 68, delay: 0 },
+                    { cx: 170, cy: 68, delay: 0.3 },
+                    { cx: 88, cy: 132, delay: 0.6 },
+                    { cx: 172, cy: 132, delay: 0.9 },
+                  ].map((dot, i) => (
+                    <motion.div
+                      key={i}
+                      animate={{ opacity: [0.4, 1, 0.4] }}
+                      transition={{ repeat: Infinity, duration: 2.2, delay: dot.delay, ease: "easeInOut" }}
+                      className="absolute w-1.5 h-1.5 rounded-full bg-indigo-400"
+                      style={{ left: dot.cx - 3, top: dot.cy - 3 }}
+                    />
+                  ))}
+                </motion.div>
               </div>
             </button>
           </motion.div>
