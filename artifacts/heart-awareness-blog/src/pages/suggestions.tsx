@@ -140,7 +140,10 @@ export default function Suggestions() {
                       rows={6}
                       className="w-full border border-[#e8d8d4] bg-white text-[#0f0c0c] placeholder:text-[#c0a8a8] rounded-xl px-4 py-3 text-sm outline-none focus:border-red-400 transition resize-none"
                     />
-                    <p className="text-[10px] text-[#c0a8a8] mt-1.5 text-right">{message.length} chars</p>
+                    <div className="flex items-center justify-between mt-1.5">
+                      <p className="text-[10px] text-[#c0a8a8]">Minimum 10 characters required</p>
+                      <p className={`text-[10px] ${message.length > 10 ? "text-green-600" : "text-[#c0a8a8]"}`}>{message.length} / 10+</p>
+                    </div>
                   </div>
 
                   {/* Send */}
