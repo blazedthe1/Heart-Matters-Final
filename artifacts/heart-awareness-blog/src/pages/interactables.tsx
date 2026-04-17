@@ -49,67 +49,19 @@ export default function Interactables() {
                 <span className="px-3 py-1.5 rounded-lg text-xs font-semibold text-indigo-300 group-hover:bg-indigo-800/60 transition-colors flex-shrink-0" style={{ background: "rgba(79,70,229,0.2)" }}>{t("int_explorer_cta")} →</span>
               </div>
 
-              {/* Anatomy preview illustration */}
-              <div className="flex-1 flex items-end justify-center pt-4 relative z-10">
-                <motion.div
-                  animate={{ scale: [1, 1.025, 1] }}
-                  transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
-                  className="relative"
-                >
-                  <svg width="260" height="200" viewBox="0 0 260 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-70">
-                    {/* Outer heart shape */}
-                    <path d="M130 185 C90 162, 20 130, 12 78 C8 50, 22 22, 50 18 C68 14, 90 24, 105 44 C112 34, 122 18, 130 14 C138 18, 148 34, 155 44 C170 24, 192 14, 210 18 C238 22, 252 50, 248 78 C240 130, 170 162, 130 185Z" stroke="rgba(129,140,248,0.5)" strokeWidth="1.5" fill="rgba(79,70,229,0.07)" />
-                    {/* Septum divider */}
-                    <line x1="130" y1="38" x2="130" y2="158" stroke="rgba(129,140,248,0.25)" strokeWidth="1" strokeDasharray="4 3" />
-                    <line x1="72" y1="100" x2="188" y2="100" stroke="rgba(129,140,248,0.2)" strokeWidth="1" strokeDasharray="4 3" />
-                    {/* Left Atrium */}
-                    <ellipse cx="90" cy="68" rx="30" ry="24" stroke="rgba(167,139,250,0.55)" strokeWidth="1.2" fill="rgba(99,102,241,0.1)" />
-                    {/* Right Atrium */}
-                    <ellipse cx="170" cy="68" rx="30" ry="24" stroke="rgba(167,139,250,0.55)" strokeWidth="1.2" fill="rgba(99,102,241,0.1)" />
-                    {/* Left Ventricle */}
-                    <path d="M62 100 Q68 138, 130 175 Q118 138, 118 100 Z" stroke="rgba(129,140,248,0.55)" strokeWidth="1.2" fill="rgba(79,70,229,0.13)" />
-                    {/* Right Ventricle */}
-                    <path d="M198 100 Q192 138, 130 175 Q142 138, 142 100 Z" stroke="rgba(129,140,248,0.55)" strokeWidth="1.2" fill="rgba(79,70,229,0.13)" />
-                    {/* Aortic arch */}
-                    <path d="M105 52 C98 28, 80 15, 95 10 C112 5, 128 20, 130 38" stroke="rgba(167,139,250,0.7)" strokeWidth="2" fill="none" />
-                    {/* Pulmonary artery */}
-                    <path d="M155 52 C162 28, 180 15, 165 10 C148 5, 132 20, 130 38" stroke="rgba(129,140,248,0.5)" strokeWidth="1.5" fill="none" />
-                    {/* Atrioventricular valves - small circles */}
-                    <circle cx="90" cy="100" r="5" stroke="rgba(167,139,250,0.6)" strokeWidth="1" fill="rgba(99,102,241,0.2)" />
-                    <circle cx="170" cy="100" r="5" stroke="rgba(167,139,250,0.6)" strokeWidth="1" fill="rgba(99,102,241,0.2)" />
-                    {/* Labels */}
-                    <text x="62" y="63" fill="rgba(167,139,250,0.75)" fontSize="9" fontFamily="Outfit, sans-serif" fontWeight="600">LA</text>
-                    <text x="174" y="63" fill="rgba(167,139,250,0.75)" fontSize="9" fontFamily="Outfit, sans-serif" fontWeight="600">RA</text>
-                    <text x="72" y="140" fill="rgba(129,140,248,0.65)" fontSize="9" fontFamily="Outfit, sans-serif" fontWeight="600">LV</text>
-                    <text x="172" y="140" fill="rgba(129,140,248,0.65)" fontSize="9" fontFamily="Outfit, sans-serif" fontWeight="600">RV</text>
-                    <text x="82" y="9" fill="rgba(196,181,253,0.65)" fontSize="8" fontFamily="Outfit, sans-serif">Aorta</text>
-                    <text x="148" y="9" fill="rgba(167,139,250,0.55)" fontSize="8" fontFamily="Outfit, sans-serif">PA</text>
-                    {/* Glow radial behind heart */}
-                    <ellipse cx="130" cy="100" rx="90" ry="70" fill="url(#heartGlow)" />
-                    <defs>
-                      <radialGradient id="heartGlow" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stopColor="rgba(99,102,241,0.08)" />
-                        <stop offset="100%" stopColor="rgba(99,102,241,0)" />
-                      </radialGradient>
-                    </defs>
-                  </svg>
-                  {/* Floating chamber dots */}
-                  {[
-                    { cx: 90, cy: 68, delay: 0 },
-                    { cx: 170, cy: 68, delay: 0.3 },
-                    { cx: 88, cy: 132, delay: 0.6 },
-                    { cx: 172, cy: 132, delay: 0.9 },
-                  ].map((dot, i) => (
-                    <motion.div
-                      key={i}
-                      animate={{ opacity: [0.4, 1, 0.4] }}
-                      transition={{ repeat: Infinity, duration: 2.2, delay: dot.delay, ease: "easeInOut" }}
-                      className="absolute w-1.5 h-1.5 rounded-full bg-indigo-400"
-                      style={{ left: dot.cx - 3, top: dot.cy - 3 }}
-                    />
-                  ))}
-                </motion.div>
-              </div>
+              {/* Decorative heart outline — bottom-right corner */}
+              <motion.svg
+                animate={{ opacity: [0.18, 0.28, 0.18] }}
+                transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
+                width="220" height="200" viewBox="0 0 220 200" fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="absolute -bottom-6 -right-6 pointer-events-none"
+              >
+                <path
+                  d="M110 182 C72 158, 8 122, 8 72 C8 40, 28 14, 56 14 C74 14, 92 24, 110 46 C128 24, 146 14, 164 14 C192 14, 212 40, 212 72 C212 122, 148 158, 110 182Z"
+                  stroke="rgba(129,140,248,0.9)" strokeWidth="1.5" fill="none"
+                />
+              </motion.svg>
             </button>
           </motion.div>
 
