@@ -59,7 +59,7 @@ export default function Interactables() {
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
             <button
               onClick={() => setGameOpen(true)}
-              className="group w-full rounded-2xl p-6 flex flex-col justify-between cursor-pointer transition-all text-left min-h-[180px]"
+              className="group w-full rounded-2xl p-6 flex flex-col justify-between cursor-pointer transition-all text-left min-h-[220px]"
               style={{ background: "rgba(185,28,28,0.08)", border: "1px solid rgba(185,28,28,0.2)" }}
               onMouseEnter={e => (e.currentTarget.style.background = "rgba(185,28,28,0.14)")}
               onMouseLeave={e => (e.currentTarget.style.background = "rgba(185,28,28,0.08)")}
@@ -76,7 +76,7 @@ export default function Interactables() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}>
-            <div className="rounded-2xl overflow-hidden min-h-[180px]" style={{ background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.2)" }}>
+            <div className="rounded-2xl overflow-hidden min-h-[220px]" style={{ background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.2)" }}>
               <div className="px-6 pt-6 pb-2 flex items-start justify-between">
                 <div>
                   <p className="text-[10px] uppercase tracking-widest text-amber-400 font-medium mb-1">Calculator</p>
@@ -89,6 +89,28 @@ export default function Interactables() {
               </div>
               <div className="px-4 pb-5">
                 <HRCalculator />
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 }} className="md:col-span-2 lg:col-span-1">
+            <div className="rounded-2xl min-h-[220px] bg-white/5 border border-white/10 p-6 flex flex-col justify-between">
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-white/35 font-medium mb-2">CPR guide</p>
+                <h3 className="text-lg font-bold text-white" style={{ fontFamily: "'Cormorant Garamond', serif" }}>CPR step-by-step</h3>
+                <p className="text-xs text-white/35 mt-2 leading-relaxed">A guided flow that walks users through CPR and AED basics one step at a time.</p>
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                {[
+                  "Check responsiveness",
+                  "Call emergency help",
+                  "Start compressions",
+                  "Use AED when ready",
+                ].map(step => (
+                  <div key={step} className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] text-white/70">
+                    {step}
+                  </div>
+                ))}
               </div>
             </div>
           </motion.div>
