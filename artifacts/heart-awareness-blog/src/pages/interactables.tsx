@@ -4,19 +4,12 @@ import { HeartExplorerModal } from "@/components/HeartExplorer";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { HeartDefenderModal } from "@/components/interactables/HeartDefender";
 import { HRCalculator } from "@/components/interactables/HRCalculator";
-
-const IDEAS = [
-  "CPR step-by-step guide",
-  "Heart sound player",
-  "Lifestyle impact sliders",
-  "Symptom warning cards",
-  "Blood pressure coach",
-  "Healthy meal builder",
-];
+import { CPRGameModal } from "@/components/interactables/CPRGame";
 
 export default function Interactables() {
-  const [gameOpen, setGameOpen] = useState(false);
+  const [gameOpen, setGameOpen]     = useState(false);
   const [explorerOpen, setExplorerOpen] = useState(false);
+  const [cprOpen, setCprOpen]       = useState(false);
   const { t } = useLanguage();
 
   return (
@@ -34,6 +27,8 @@ export default function Interactables() {
 
       <div className="py-12 px-6 max-w-6xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+          {/* Heart Explorer — featured, spans 2 cols + 2 rows */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="md:col-span-2 lg:row-span-2">
             <button
               onClick={() => setExplorerOpen(true)}
@@ -56,6 +51,7 @@ export default function Interactables() {
             </button>
           </motion.div>
 
+          {/* Heart Defender */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
             <button
               onClick={() => setGameOpen(true)}
@@ -75,6 +71,7 @@ export default function Interactables() {
             </button>
           </motion.div>
 
+          {/* HR Calculator */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}>
             <div className="rounded-2xl overflow-hidden min-h-[220px]" style={{ background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.2)" }}>
               <div className="px-6 pt-6 pb-2 flex items-start justify-between">
@@ -93,46 +90,31 @@ export default function Interactables() {
             </div>
           </motion.div>
 
+          {/* CPR Game */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.35 }} className="md:col-span-2 lg:col-span-1">
-            <div className="rounded-2xl min-h-[220px] bg-white/5 border border-white/10 p-6 flex flex-col justify-between">
-              <div>
-                <p className="text-[10px] uppercase tracking-widest text-white/35 font-medium mb-2">CPR guide</p>
-                <h3 className="text-lg font-bold text-white" style={{ fontFamily: "'Cormorant Garamond', serif" }}>CPR step-by-step</h3>
-                <p className="text-xs text-white/35 mt-2 leading-relaxed">A guided flow that walks users through CPR and AED basics one step at a time.</p>
+            <button
+              onClick={() => setCprOpen(true)}
+              className="group w-full rounded-2xl p-6 flex flex-col justify-between cursor-pointer transition-all text-left min-h-[220px]"
+              style={{ background: "rgba(34,197,94,0.06)", border: "1px solid rgba(34,197,94,0.2)" }}
+              onMouseEnter={e => (e.currentTarget.style.background = "rgba(34,197,94,0.12)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "rgba(34,197,94,0.06)")}
+            >
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(34,197,94,0.15)", border: "1px solid rgba(34,197,94,0.3)" }}>
+                <span className="text-2xl">🫀</span>
               </div>
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                {[
-                  "Check responsiveness",
-                  "Call emergency help",
-                  "Start compressions",
-                  "Use AED when ready",
-                ].map(step => (
-                  <div key={step} className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] text-white/70">
-                    {step}
-                  </div>
-                ))}
+              <div className="mt-4">
+                <p className="text-[10px] uppercase tracking-widest text-green-400 font-medium mb-1">Interactive Guide</p>
+                <h3 className="text-lg font-bold text-white" style={{ fontFamily: "'Cormorant Garamond', serif" }}>CPR Training</h3>
+                <p className="text-xs text-white/35 mt-1">Step through a real CPR scenario — check the scene, call for help, and practice compressions at the right pace.</p>
               </div>
-            </div>
+              <div className="mt-4 flex items-center gap-2">
+                <span className="px-4 py-2 rounded-xl text-xs font-semibold text-green-300 group-hover:bg-green-900/60 transition-colors" style={{ background: "rgba(34,197,94,0.15)", border: "1px solid rgba(34,197,94,0.25)" }}>
+                  Start Training →
+                </span>
+              </div>
+            </button>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }} className="md:col-span-2 lg:col-span-3">
-            <div className="rounded-2xl bg-white/5 border border-white/10 p-6">
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <div>
-                  <p className="text-[10px] uppercase tracking-widest text-white/35 font-medium mb-2">Interactable ideas</p>
-                  <h3 className="text-lg font-bold text-white" style={{ fontFamily: "'Cormorant Garamond', serif" }}>Pick the next one</h3>
-                  <p className="text-xs text-white/35 mt-2 leading-relaxed">Here are all the ideas we can turn into the same rectangular card style.</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {IDEAS.map((idea) => (
-                  <div key={idea} className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70">
-                    {idea}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
         </div>
 
         <div className="mt-6">
@@ -145,6 +127,7 @@ export default function Interactables() {
 
       <AnimatePresence>{gameOpen && <HeartDefenderModal onClose={() => setGameOpen(false)} />}</AnimatePresence>
       <AnimatePresence>{explorerOpen && <HeartExplorerModal onClose={() => setExplorerOpen(false)} />}</AnimatePresence>
+      <AnimatePresence>{cprOpen && <CPRGameModal onClose={() => setCprOpen(false)} />}</AnimatePresence>
     </div>
   );
 }
